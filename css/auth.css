@@ -1,0 +1,335 @@
+/* ============================================================
+   Planora AI – Authentication Pages CSS
+   ============================================================ */
+
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative;
+}
+
+/* ── Auth Left Panel ─────────────────────────────────── */
+.auth-panel-left {
+  background: var(--color-bg-surface);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+.auth-panel-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.auth-panel-orb-1 {
+  position: absolute;
+  width: 400px; height: 400px;
+  top: -100px; left: -100px;
+  background: radial-gradient(circle, rgba(124,58,237,0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(60px);
+}
+.auth-panel-orb-2 {
+  position: absolute;
+  width: 300px; height: 300px;
+  bottom: 0; right: -50px;
+  background: radial-gradient(circle, rgba(6,182,212,0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(60px);
+}
+.auth-panel-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(99,102,241,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99,102,241,0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.auth-panel-content {
+  position: relative;
+  z-index: 1;
+  padding: var(--space-12);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.auth-panel-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  margin-bottom: auto;
+}
+.auth-panel-logo img {
+  height: 40px;
+  width: auto;
+}
+.auth-panel-logo-text {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.auth-panel-hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-8) 0;
+}
+.auth-panel-title {
+  font-size: clamp(var(--text-3xl), 3.5vw, var(--text-5xl));
+  font-weight: var(--font-extrabold);
+  line-height: 1.15;
+  margin-bottom: var(--space-6);
+}
+.auth-panel-desc {
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
+  max-width: 400px;
+}
+.auth-panel-features {
+  margin-top: var(--space-10);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.auth-feature-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+.auth-feature-check {
+  width: 24px; height: 24px;
+  border-radius: var(--radius-full);
+  background: rgba(16,185,129,0.15);
+  border: 1px solid rgba(16,185,129,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-success);
+  flex-shrink: 0;
+}
+.auth-panel-quote {
+  margin-top: auto;
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--color-border-subtle);
+}
+.auth-quote-text {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+  font-style: italic;
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-4);
+}
+.auth-quote-author {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-medium);
+}
+
+/* ── Auth Right Panel ────────────────────────────────── */
+.auth-panel-right {
+  background: var(--color-bg-base);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12) var(--space-8);
+  overflow-y: auto;
+}
+.auth-form-container {
+  width: 100%;
+  max-width: 440px;
+}
+.auth-form-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+.auth-form-title {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  margin-bottom: var(--space-2);
+}
+.auth-form-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+/* ── Social Login ────────────────────────────────────── */
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-6);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.social-btn:hover {
+  background: var(--color-bg-card-hover);
+  border-color: var(--color-border-strong);
+}
+.social-btn img { width: 20px; height: 20px; }
+
+/* ── Auth Form ───────────────────────────────────────── */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.auth-footer-link {
+  text-align: center;
+  margin-top: var(--space-6);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+.auth-footer-link a {
+  color: var(--color-text-accent);
+  font-weight: var(--font-medium);
+}
+.auth-footer-link a:hover { text-decoration: underline; }
+
+/* ── Password strength ───────────────────────────────── */
+.password-strength {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.password-strength-bars {
+  display: flex;
+  gap: var(--space-1);
+}
+.strength-bar {
+  flex: 1;
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  transition: background var(--transition-base);
+}
+.strength-bar.filled.weak   { background: var(--color-error); }
+.strength-bar.filled.fair   { background: var(--color-warning); }
+.strength-bar.filled.good   { background: var(--color-info); }
+.strength-bar.filled.strong { background: var(--color-success); }
+
+.password-toggle {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+.password-toggle:hover { color: var(--color-text-primary); }
+.password-wrapper { position: relative; }
+
+/* ── Onboarding ──────────────────────────────────────── */
+.onboarding-page {
+  min-height: 100vh;
+  background: var(--color-bg-base);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  position: relative;
+  overflow: hidden;
+}
+.onboarding-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.onboarding-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+}
+.onboarding-container {
+  width: 100%;
+  max-width: 640px;
+  position: relative;
+  z-index: 1;
+}
+.onboarding-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+  text-decoration: none;
+}
+.onboarding-logo img { height: 36px; }
+.onboarding-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-3xl);
+  padding: var(--space-10);
+  box-shadow: var(--shadow-xl);
+}
+.onboarding-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+.onboarding-title {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  margin-bottom: var(--space-2);
+}
+.onboarding-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+.onboarding-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+.onboarding-option {
+  background: var(--color-bg-surface);
+  border: 2px solid var(--color-border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-align: center;
+}
+.onboarding-option:hover {
+  border-color: var(--color-border-default);
+  background: var(--color-bg-card);
+}
+.onboarding-option.selected {
+  border-color: var(--color-brand-primary);
+  background: rgba(124,58,237,0.1);
+}
+.onboarding-option-icon {
+  font-size: 2rem;
+  margin-bottom: var(--space-3);
+}
+.onboarding-option-label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+.onboarding-option-desc {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+}

@@ -1,0 +1,177 @@
+/* ============================================================
+   Planora AI – Responsive Design
+   ============================================================ */
+
+/* ── Tablet (1024px) ─────────────────────────────────── */
+@media (max-width: 1024px) {
+  :root {
+    --content-padding: var(--space-6);
+  }
+
+  /* Navigation */
+  .nav-links { display: none; }
+  .nav-hamburger { display: flex; }
+
+  /* Dashboard */
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .dashboard-sidebar-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Budget */
+  .budget-overview { grid-template-columns: repeat(3, 1fr); }
+  .budget-pie-container { grid-template-columns: 1fr; }
+
+  /* Copilot */
+  .copilot-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .copilot-chat { height: 500px; }
+
+  /* Auth */
+  .auth-page { grid-template-columns: 1fr; }
+  .auth-panel-left { display: none; }
+  .auth-panel-right {
+    padding: var(--space-8) var(--space-6);
+    min-height: 100vh;
+  }
+
+  /* Footer */
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Workspace tabs */
+  .task-columns { grid-template-columns: 1fr; }
+}
+
+/* ── Mobile (768px) ──────────────────────────────────── */
+@media (max-width: 768px) {
+  :root {
+    --content-padding: var(--space-4);
+  }
+
+  /* Sidebar */
+  .sidebar {
+    transform: translateX(-100%);
+    z-index: var(--z-modal);
+  }
+  .sidebar.mobile-open { transform: translateX(0); }
+  .app-main { margin-left: 0 !important; }
+  .app-topbar { padding: 0 var(--space-4); }
+
+  /* Dashboard */
+  .dashboard-stats { grid-template-columns: 1fr 1fr; }
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .dashboard-sidebar-panel { grid-template-columns: 1fr; }
+  .quick-actions { grid-template-columns: repeat(2, 1fr); }
+
+  /* Event cards */
+  .features-grid { grid-template-columns: 1fr; }
+  .testimonial-grid { grid-template-columns: 1fr; }
+
+  /* Budget */
+  .budget-overview { grid-template-columns: 1fr; }
+  .guest-stats { grid-template-columns: repeat(2, 1fr); }
+
+  /* Vendor */
+  .vendor-grid { grid-template-columns: 1fr; }
+
+  /* Wizard */
+  .wizard-steps { flex-wrap: nowrap; overflow-x: auto; }
+  .wizard-step-label { display: none; }
+
+  /* Hero */
+  .hero-cta { flex-direction: column; }
+  .hero-trust { flex-direction: column; gap: var(--space-3); }
+
+  /* Onboarding */
+  .onboarding-options { grid-template-columns: 1fr; }
+
+  /* Modals */
+  .modal { max-height: 100vh; border-radius: var(--radius-2xl) var(--radius-2xl) 0 0; }
+  .modal-backdrop { align-items: flex-end; }
+
+  /* Tables */
+  .data-table th:nth-child(n+4),
+  .data-table td:nth-child(n+4) { display: none; }
+
+  /* Toast */
+  #toast-container { left: var(--space-4); right: var(--space-4); }
+  .toast { max-width: 100%; }
+
+  /* Footer */
+  .footer-grid { grid-template-columns: 1fr; gap: var(--space-8); }
+  .footer-bottom { flex-direction: column; align-items: center; text-align: center; }
+
+  /* Workspace header */
+  .workspace-header-top { flex-direction: column; }
+  .workspace-event-meta { gap: var(--space-3); }
+
+  /* Copilot */
+  .copilot-layout { grid-template-columns: 1fr; }
+  .copilot-chat { height: 450px; }
+
+  /* Steps */
+  .steps-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Small Mobile (480px) ────────────────────────────── */
+@media (max-width: 480px) {
+  .dashboard-stats { grid-template-columns: 1fr; }
+  .guest-stats { grid-template-columns: 1fr 1fr; }
+  .budget-overview { grid-template-columns: 1fr; }
+
+  .hero-title { font-size: var(--text-4xl); }
+  .hero-subtitle { font-size: var(--text-base); }
+
+  .section-heading { font-size: var(--text-3xl); }
+
+  .btn { font-size: var(--text-sm); }
+  .btn-lg { padding: var(--space-3) var(--space-6); }
+
+  .onboarding-card { padding: var(--space-6); }
+}
+
+/* ── Sidebar Mobile Overlay ──────────────────────────── */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: calc(var(--z-modal) - 1);
+  display: none;
+  backdrop-filter: var(--blur-light);
+}
+.sidebar-overlay.visible { display: block; }
+
+/* ── Mobile App Header ───────────────────────────────── */
+.mobile-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px; height: 40px;
+  border-radius: var(--radius-lg);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.mobile-menu-btn:hover {
+  background: var(--color-bg-glass-light);
+  color: var(--color-text-primary);
+}
+@media (max-width: 768px) {
+  .mobile-menu-btn { display: flex; }
+}
+
+/* ── Print ───────────────────────────────────────────── */
+@media print {
+  .sidebar, .app-topbar, .nav-public,
+  .btn, .modal-backdrop { display: none !important; }
+  .app-main { margin-left: 0 !important; }
+  body { background: white; color: black; }
+}

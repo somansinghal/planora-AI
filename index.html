@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planora AI – From Idea to Flawlessly Planned</title>
+  <meta name="description" content="Planora AI is your intelligent event planning workspace. Create weddings, birthdays, corporate events and more with AI-powered planning, budget tracking, and team coordination.">
+  <meta name="keywords" content="event planning, AI event planner, wedding planner, birthday planner, corporate events, budget planning">
+  <meta name="author" content="Planora AI">
+  <meta property="og:title" content="Planora AI – From Idea to Flawlessly Planned">
+  <meta property="og:description" content="AI-powered event planning SaaS. From idea to flawlessly planned.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/logo/planora-logo.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="robots" content="index, follow">
+  <link rel="icon" type="image/png" href="assets/logo/planora-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/landing.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <!-- Public Navigation -->
+  <nav class="nav-public" id="main-nav" aria-label="Main navigation">
+    <div class="nav-container container">
+      <a href="index.html" class="nav-logo" aria-label="Planora AI Home">
+        <img src="assets/logo/planora-logo.png" alt="Planora AI Logo" width="36" height="36">
+        <span class="nav-logo-text">Planora AI</span>
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="#features" class="nav-link">Features</a></li>
+        <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
+        <li><a href="pricing.html" class="nav-link">Pricing</a></li>
+        <li><a href="about.html" class="nav-link">About</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-ghost btn-sm" id="nav-login-btn">Sign In</a>
+        <a href="signup.html" class="btn btn-primary btn-sm" id="nav-signup-btn">Get Started Free</a>
+      </div>
+      <button class="nav-hamburger" id="hamburger-btn" aria-label="Toggle mobile menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="nav-mobile-menu" id="mobile-menu" role="dialog" aria-label="Mobile navigation" aria-hidden="true">
+    <nav class="nav-mobile-links" aria-label="Mobile navigation links">
+      <a href="#features" class="nav-mobile-link" onclick="closeMobileMenu()">Features</a>
+      <a href="#how-it-works" class="nav-mobile-link" onclick="closeMobileMenu()">How It Works</a>
+      <a href="pricing.html" class="nav-mobile-link">Pricing</a>
+      <a href="about.html" class="nav-mobile-link">About</a>
+    </nav>
+    <div class="nav-mobile-actions">
+      <a href="login.html" class="btn btn-secondary w-full">Sign In</a>
+      <a href="signup.html" class="btn btn-primary w-full">Get Started Free</a>
+    </div>
+  </div>
+
+  <main>
+    <!-- ── Hero Section ────────────────────────────────── -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-bg" aria-hidden="true">
+        <div class="hero-grid"></div>
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        <div class="hero-orb hero-orb-3"></div>
+      </div>
+      <div class="hero-content">
+        <div class="hero-eyebrow" role="text">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z"/></svg>
+          AI-Powered Event Planning
+        </div>
+        <h1 class="hero-title" id="hero-title">
+          From <span class="gradient-text">Idea</span> to<br>
+          Flawlessly <span class="gradient-text">Planned.</span>
+        </h1>
+        <p class="hero-subtitle">
+          Planora AI is your intelligent event workspace. Plan weddings, birthdays, corporate events and more with AI-generated plans, smart budgeting, and effortless coordination.
+        </p>
+        <div class="hero-cta">
+          <a href="signup.html" class="btn btn-primary btn-lg" id="hero-cta-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z"/></svg>
+            Start Planning for Free
+          </a>
+          <a href="#how-it-works" class="btn btn-secondary btn-lg" id="hero-cta-secondary">
+            See How It Works
+          </a>
+        </div>
+        <div class="hero-trust">
+          <div class="hero-trust-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            No credit card required
+          </div>
+          <div class="hero-trust-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Free to get started
+          </div>
+          <div class="hero-trust-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            AI-powered planning
+          </div>
+        </div>
+      </div>
+      <div class="scroll-indicator" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+    </section>
+
+    <!-- ── Features Section ────────────────────────────── -->
+    <section class="features-section" id="features" aria-labelledby="features-title">
+      <div class="container">
+        <div class="text-center">
+          <span class="section-eyebrow">Features</span>
+          <h2 class="section-heading" id="features-title">
+            Everything you need to plan<br>
+            <span class="gradient-text">perfect events</span>
+          </h2>
+          <p class="section-description" style="margin: 0 auto;">
+            From AI-generated plans to budget tracking and guest management — all in one intelligent workspace.
+          </p>
+        </div>
+        <div class="features-grid" role="list">
+          <article class="feature-card" role="listitem">
+            <div class="feature-icon" style="background: rgba(124,58,237,0.15); color: #A78BFA;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z"/></svg>
+            </div>
+            <h3 class="feature-title">AI Event Studio</h3>
+            <p class="feature-desc">Tell Planora AI your vision and get a complete, personalized event plan in seconds — from theme ideas to vendor checklists and budget breakdowns.</p>
+          </article>
+          <article class="feature-card" role="listitem">
+            <div class="feature-icon" style="background: rgba(79,70,229,0.15); color: #818CF8;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <h3 class="feature-title">Smart Budget Management</h3>
+            <p class="feature-desc">Track estimated vs actual expenses with beautiful charts. Get real-time budget health, category breakdowns, and spending alerts.</p>
+          </article>
+          <article class="feature-card" role="listitem">
+            <div class="feature-icon" style="background: rgba(6,182,212,0.15); color: #67E8F9;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <h3 class="feature-title">Timeline & Milestones</h3>
+            <p class="feature-desc">Visual preparation timelines with milestones, deadlines, and event-day schedules. Never miss a critical step again.</p>
+          </article>
+          <article class="feature-card" role="listitem">
+            <div class="feature-icon" style="background: rgba(16,185,129,0.15); color: #34D399;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <h3 class="feature-title">Task Management</h3>
+            <p class="feature-desc">Organize everything with priority-based tasks, deadlines, and completion tracking. Keep your team and yourself on track.</p>
+          </article>
+          <article class="feature-card" role="listitem">
+            <div class="feature-icon" style="background: rgba(245,158,11,0.15); color: #FCD34D;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <h3 class="feature-title">Guest Management</h3>
+            <p class="feature-desc">Manage your guest list with RSVP tracking, dietary preferences, and attendance counts. Keep everything organized in one place.</p>
+          </article>
+          <article class="feature-card" role="listitem">
+            <div class="feature-icon" style="background: rgba(239,68,68,0.15); color: #F87171;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            </div>
+            <h3 class="feature-title">Vendor Organization</h3>
+            <p class="feature-desc">Keep all your vendor contacts, quotes, and booking status organized. Compare costs and manage relationships effortlessly.</p>
+          </article>
+          <article class="feature-card" role="listitem">
+            <div class="feature-icon" style="background: rgba(124,58,237,0.15); color: #C4B5FD;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h3 class="feature-title">AI Event Copilot</h3>
+            <p class="feature-desc">Chat with your AI assistant to refine plans, reduce budgets, explore themes, and get personalized recommendations in real-time.</p>
+          </article>
+          <article class="feature-card" role="listitem">
+            <div class="feature-icon" style="background: rgba(6,182,212,0.15); color: #22D3EE;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
+            <h3 class="feature-title">Reports & Exports</h3>
+            <p class="feature-desc">Generate comprehensive event summaries with budget breakdowns, timelines, and task completion reports — downloadable and shareable.</p>
+          </article>
+          <article class="feature-card" role="listitem">
+            <div class="feature-icon" style="background: rgba(16,185,129,0.15); color: #6EE7B7;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h3 class="feature-title">Secure & Private</h3>
+            <p class="feature-desc">Your events are protected with Firebase Authentication, Firestore security rules, and server-side data validation. Your data stays yours.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── How It Works ────────────────────────────────── -->
+    <section class="how-it-works" id="how-it-works" aria-labelledby="how-it-works-title">
+      <div class="container">
+        <div class="text-center">
+          <span class="section-eyebrow">How It Works</span>
+          <h2 class="section-heading" id="how-it-works-title">
+            Plan your perfect event in<br>
+            <span class="gradient-text">4 simple steps</span>
+          </h2>
+          <p class="section-description" style="margin: 0 auto;">
+            From idea to flawlessly planned — Planora AI handles the complexity so you can focus on the celebration.
+          </p>
+        </div>
+        <div class="steps-grid" role="list">
+          <div class="step-card" role="listitem">
+            <div class="step-num" aria-hidden="true">1</div>
+            <h3 class="step-title">Describe Your Event</h3>
+            <p class="step-desc">Share your event type, date, budget, guest count, and vision. The more you tell us, the better your plan.</p>
+          </div>
+          <div class="step-card" role="listitem">
+            <div class="step-num" aria-hidden="true">2</div>
+            <h3 class="step-title">AI Generates Your Plan</h3>
+            <p class="step-desc">Planora AI creates a complete event plan with themes, budget breakdown, timeline, vendor checklist, and personalized tips.</p>
+          </div>
+          <div class="step-card" role="listitem">
+            <div class="step-num" aria-hidden="true">3</div>
+            <h3 class="step-title">Customize & Refine</h3>
+            <p class="step-desc">Review and adjust every detail. Chat with your AI Copilot to explore alternatives, reduce costs, or add special touches.</p>
+          </div>
+          <div class="step-card" role="listitem">
+            <div class="step-num" aria-hidden="true">4</div>
+            <h3 class="step-title">Execute Flawlessly</h3>
+            <p class="step-desc">Track tasks, manage vendors, coordinate guests, and monitor your budget — all from your unified event workspace.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Event Types ─────────────────────────────────── -->
+    <section class="features-section" style="background: var(--color-bg-surface); padding: var(--space-20) 0;" aria-labelledby="event-types-title">
+      <div class="container">
+        <div class="text-center">
+          <span class="section-eyebrow">Event Types</span>
+          <h2 class="section-heading" id="event-types-title">
+            Plan any event,<br>
+            <span class="gradient-text">any occasion</span>
+          </h2>
+        </div>
+        <div class="features-grid" style="margin-top: var(--space-12);" role="list">
+          <div class="feature-card text-center" role="listitem" style="padding: var(--space-6);">
+            <div style="font-size: 3rem; margin-bottom: var(--space-4);" aria-hidden="true">💍</div>
+            <h3 class="feature-title">Weddings</h3>
+            <p class="feature-desc">Complete wedding planning from venue to catering, decor to entertainment — all within your budget.</p>
+          </div>
+          <div class="feature-card text-center" role="listitem" style="padding: var(--space-6);">
+            <div style="font-size: 3rem; margin-bottom: var(--space-4);" aria-hidden="true">🎂</div>
+            <h3 class="feature-title">Birthdays</h3>
+            <p class="feature-desc">From intimate gatherings to grand birthday parties — every age, every style, every budget.</p>
+          </div>
+          <div class="feature-card text-center" role="listitem" style="padding: var(--space-6);">
+            <div style="font-size: 3rem; margin-bottom: var(--space-4);" aria-hidden="true">🏢</div>
+            <h3 class="feature-title">Corporate Events</h3>
+            <p class="feature-desc">Professional conferences, team outings, product launches, and company celebrations.</p>
+          </div>
+          <div class="feature-card text-center" role="listitem" style="padding: var(--space-6);">
+            <div style="font-size: 3rem; margin-bottom: var(--space-4);" aria-hidden="true">💑</div>
+            <h3 class="feature-title">Anniversaries</h3>
+            <p class="feature-desc">Make every anniversary memorable with thoughtful planning and personal touches.</p>
+          </div>
+          <div class="feature-card text-center" role="listitem" style="padding: var(--space-6);">
+            <div style="font-size: 3rem; margin-bottom: var(--space-4);" aria-hidden="true">🎓</div>
+            <h3 class="feature-title">Graduations</h3>
+            <p class="feature-desc">Celebrate achievements in style with perfectly organized graduation parties and ceremonies.</p>
+          </div>
+          <div class="feature-card text-center" role="listitem" style="padding: var(--space-6);">
+            <div style="font-size: 3rem; margin-bottom: var(--space-4);" aria-hidden="true">🎉</div>
+            <h3 class="feature-title">Community Events</h3>
+            <p class="feature-desc">Organize festivals, charity events, reunions, and community gatherings with ease.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Testimonials ────────────────────────────────── -->
+    <section class="testimonials" aria-labelledby="testimonials-title">
+      <div class="container">
+        <div class="text-center">
+          <span class="section-eyebrow">Testimonials</span>
+          <h2 class="section-heading" id="testimonials-title">
+            Loved by event planners<br>
+            <span class="gradient-text">everywhere</span>
+          </h2>
+        </div>
+        <div class="testimonial-grid">
+          <blockquote class="testimonial-card">
+            <div class="testimonial-stars" aria-label="5 stars">
+              ★★★★★
+            </div>
+            <p class="testimonial-text">"Planora AI helped me plan my daughter's wedding in just 3 days. The AI-generated plan covered everything I hadn't even thought about. Absolutely incredible!"</p>
+            <footer class="testimonial-author">
+              <div class="testimonial-avatar" aria-hidden="true">P</div>
+              <div>
+                <div class="testimonial-name">Priya Sharma</div>
+                <div class="testimonial-role">Mother of the Bride, Mumbai</div>
+              </div>
+            </footer>
+          </blockquote>
+          <blockquote class="testimonial-card">
+            <div class="testimonial-stars" aria-label="5 stars">
+              ★★★★★
+            </div>
+            <p class="testimonial-text">"As a professional event planner, I manage 20+ events simultaneously. Planora AI has become my secret weapon — the budget tracking alone saves me hours every week."</p>
+            <footer class="testimonial-author">
+              <div class="testimonial-avatar" aria-hidden="true">R</div>
+              <div>
+                <div class="testimonial-name">Rahul Mehta</div>
+                <div class="testimonial-role">Professional Event Planner, Delhi</div>
+              </div>
+            </footer>
+          </blockquote>
+          <blockquote class="testimonial-card">
+            <div class="testimonial-stars" aria-label="5 stars">
+              ★★★★★
+            </div>
+            <p class="testimonial-text">"We used Planora AI for our company's annual conference. The AI Copilot suggested ideas we never would have thought of, and the guest management was seamless."</p>
+            <footer class="testimonial-author">
+              <div class="testimonial-avatar" aria-hidden="true">A</div>
+              <div>
+                <div class="testimonial-name">Ananya Krishnan</div>
+                <div class="testimonial-role">HR Director, Bengaluru</div>
+              </div>
+            </footer>
+          </blockquote>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CTA Section ─────────────────────────────────── -->
+    <section class="cta-section" aria-labelledby="cta-title">
+      <div class="cta-bg" aria-hidden="true"></div>
+      <div class="container">
+        <div class="cta-card">
+          <span class="section-eyebrow">Get Started Today</span>
+          <h2 class="section-heading" id="cta-title" style="margin-bottom: var(--space-4);">
+            Ready to plan your<br>
+            <span class="gradient-text">perfect event?</span>
+          </h2>
+          <p class="section-description" style="margin: 0 auto var(--space-8);">
+            Join thousands of event planners who've made the switch to intelligent, AI-powered event planning.
+          </p>
+          <div class="flex items-center justify-center gap-4 flex-wrap">
+            <a href="signup.html" class="btn btn-primary btn-lg" id="cta-signup-btn">
+              Start Planning for Free
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+            <a href="pricing.html" class="btn btn-secondary btn-lg">View Pricing</a>
+          </div>
+          <p class="text-sm text-tertiary" style="margin-top: var(--space-4);">Free to start · No credit card required</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" aria-label="Site footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="nav-logo" style="margin-bottom: var(--space-2);" aria-label="Planora AI Home">
+            <img src="assets/logo/planora-logo.png" alt="Planora AI" width="32" height="32">
+            <span class="nav-logo-text">Planora AI</span>
+          </a>
+          <p>Intelligent event planning for everyone. From idea to flawlessly planned.</p>
+        </div>
+        <div>
+          <h3 class="footer-col-title">Product</h3>
+          <ul class="footer-links" role="list">
+            <li><a href="#features" class="footer-link">Features</a></li>
+            <li><a href="pricing.html" class="footer-link">Pricing</a></li>
+            <li><a href="#how-it-works" class="footer-link">How It Works</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-col-title">Company</h3>
+          <ul class="footer-links" role="list">
+            <li><a href="about.html" class="footer-link">About Us</a></li>
+            <li><a href="privacy.html" class="footer-link">Privacy Policy</a></li>
+            <li><a href="terms.html" class="footer-link">Terms of Service</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-col-title">Support</h3>
+          <ul class="footer-links" role="list">
+            <li><a href="signup.html" class="footer-link">Get Started</a></li>
+            <li><a href="login.html" class="footer-link">Sign In</a></li>
+            <li><a href="about.html#contact" class="footer-link">Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© <span id="footer-year">2024</span> Planora AI. All rights reserved.</p>
+        <div class="flex gap-4">
+          <a href="privacy.html" class="footer-link">Privacy</a>
+          <a href="terms.html" class="footer-link">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div id="toast-container" role="alert" aria-live="polite" aria-atomic="false"></div>
+
+  <script type="module" src="js/navigation.js"></script>
+  <script>
+    // Update footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – Planora AI</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="assets/logo/planora-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/workspace.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-layout" id="app-root">
+    <!-- Populated by JS -->
+  </div>
+
+  <div id="toast-container" role="alert" aria-live="polite" aria-atomic="false"></div>
+
+  <script type="module">
+    import { requireAuth, showAuthLoading, hideAuthLoading } from './js/auth-guard.js';
+    import { signOutUser, getCurrentUser } from './js/auth.js';
+    import { getAppShellHTML, getTopbarHTML } from './js/app-shell.js';
+    import { getEvents } from './js/api.js';
+    import { 
+      showToast, formatCurrency, formatDate, formatDateShort,
+      daysUntil, formatCountdown, getEventEmoji, getInitials,
+      escapeHtml, renderSkeletons, showConfirm
+    } from './js/utils.js';
+    import { initSidebar } from './js/navigation.js';
+
+    showAuthLoading();
+
+    const user = await requireAuth();
+    hideAuthLoading();
+
+    // ── Inject app shell ────────────────────────────────────
+    const root = document.getElementById('app-root');
+    root.innerHTML = `
+      ${getAppShellHTML('dashboard')}
+      <div class="app-main" id="app-main">
+        ${getTopbarHTML('Dashboard')}
+        <main class="app-content page-enter" id="main-content">
+          <!-- Dynamic content injected below -->
+          <div id="dashboard-content">
+            <div class="dashboard-header">
+              <h2 class="dashboard-welcome" id="welcome-msg">Good morning! 👋</h2>
+              <p class="dashboard-date" id="dashboard-date"></p>
+            </div>
+
+            <!-- Stats -->
+            <div class="dashboard-stats" id="stats-grid">
+              ${[0,1,2,3].map(() => `<div class="skeleton" style="height:120px;border-radius:var(--radius-xl);"></div>`).join('')}
+            </div>
+
+            <!-- Main grid -->
+            <div class="dashboard-grid">
+              <div class="dashboard-main">
+                <!-- Quick Actions -->
+                <div class="quick-actions" id="quick-actions">
+                  <a href="create-event.html" class="quick-action-btn" id="qa-create-event">
+                    <div class="quick-action-icon" style="background:rgba(124,58,237,0.15);color:#A78BFA;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </div>
+                    <div class="quick-action-label">New Event</div>
+                  </a>
+                  <a href="planner.html" class="quick-action-btn" id="qa-ai-studio">
+                    <div class="quick-action-icon" style="background:rgba(79,70,229,0.15);color:#818CF8;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z"/></svg>
+                    </div>
+                    <div class="quick-action-label">AI Studio</div>
+                  </a>
+                  <a href="budget.html" class="quick-action-btn" id="qa-budget">
+                    <div class="quick-action-icon" style="background:rgba(16,185,129,0.15);color:#34D399;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                    <div class="quick-action-label">Budget</div>
+                  </a>
+                  <a href="tasks.html" class="quick-action-btn" id="qa-tasks">
+                    <div class="quick-action-icon" style="background:rgba(245,158,11,0.15);color:#FCD34D;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    </div>
+                    <div class="quick-action-label">Tasks</div>
+                  </a>
+                  <a href="copilot.html" class="quick-action-btn" id="qa-copilot">
+                    <div class="quick-action-icon" style="background:rgba(6,182,212,0.15);color:#22D3EE;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <div class="quick-action-label">AI Copilot</div>
+                  </a>
+                </div>
+
+                <!-- Events List -->
+                <div class="card">
+                  <div class="section-header" style="margin-bottom:var(--space-4);">
+                    <div>
+                      <h3 class="section-title">Your Events</h3>
+                      <p class="section-subtitle">Manage and track all your events</p>
+                    </div>
+                    <a href="create-event.html" class="btn btn-primary btn-sm" id="new-event-btn">+ New Event</a>
+                  </div>
+                  <div id="events-list">
+                    ${[0,1,2].map(() => `<div class="skeleton" style="height:80px;border-radius:var(--radius-lg);margin-bottom:var(--space-3);"></div>`).join('')}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sidebar -->
+              <div class="dashboard-sidebar-panel">
+                <!-- Budget Overview Widget -->
+                <div class="card" id="budget-widget">
+                  <div class="section-header" style="margin-bottom:var(--space-4);">
+                    <h3 class="section-title text-base">Budget Overview</h3>
+                  </div>
+                  <div id="budget-chart-area" style="height:160px;position:relative;">
+                    <div class="skeleton" style="height:100%;border-radius:var(--radius-lg);"></div>
+                  </div>
+                  <div id="budget-details" class="budget-summary-details"></div>
+                </div>
+
+                <!-- Upcoming Events Widget -->
+                <div class="card">
+                  <div class="section-header" style="margin-bottom:var(--space-4);">
+                    <h3 class="section-title text-base">Upcoming Events</h3>
+                    <a href="timeline.html" class="text-sm" style="color:var(--color-text-accent);">View all</a>
+                  </div>
+                  <div class="upcoming-events" id="upcoming-events">
+                    <div class="skeleton" style="height:70px;border-radius:var(--radius-lg);"></div>
+                    <div class="skeleton" style="height:70px;border-radius:var(--radius-lg);margin-top:var(--space-3);"></div>
+                  </div>
+                </div>
+
+                <!-- Recent Tasks Widget -->
+                <div class="card">
+                  <div class="section-header" style="margin-bottom:var(--space-4);">
+                    <h3 class="section-title text-base">Recent Tasks</h3>
+                    <a href="tasks.html" class="text-sm" style="color:var(--color-text-accent);">View all</a>
+                  </div>
+                  <div class="task-widget-items" id="tasks-widget">
+                    <div class="skeleton" style="height:40px;border-radius:var(--radius-md);"></div>
+                    <div class="skeleton" style="height:40px;border-radius:var(--radius-md);margin-top:var(--space-2);"></div>
+                    <div class="skeleton" style="height:40px;border-radius:var(--radius-md);margin-top:var(--space-2);"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    `;
+
+    initSidebar();
+
+    // ── Update user info ────────────────────────────────────
+    function updateUserInfo() {
+      const name = user.displayName || user.email?.split('@')[0] || 'User';
+      const initials = getInitials(name);
+      
+      document.getElementById('sidebar-user-name').textContent = name;
+      document.getElementById('sidebar-user-email').textContent = user.email || '';
+      document.getElementById('sidebar-avatar').textContent = initials;
+      
+      if (user.photoURL) {
+        document.getElementById('sidebar-avatar').innerHTML = `<img src="${user.photoURL}" alt="${escapeHtml(name)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+      }
+
+      // Welcome message
+      const hour = new Date().getHours();
+      const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+      document.getElementById('welcome-msg').textContent = `${greeting}, ${name.split(' ')[0]}! 👋`;
+      
+      // Date
+      document.getElementById('dashboard-date').textContent = new Date().toLocaleDateString('en-IN', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+    }
+    updateUserInfo();
+
+    // ── User dropdown ───────────────────────────────────────
+    const userBtn = document.getElementById('sidebar-user-btn');
+    const userDropdown = document.getElementById('user-dropdown');
+    
+    userBtn.addEventListener('click', () => {
+      userDropdown.classList.toggle('hidden');
+      // Position dropdown
+      const rect = userBtn.getBoundingClientRect();
+      userDropdown.style.position = 'fixed';
+      userDropdown.style.bottom = `${window.innerHeight - rect.top + 8}px`;
+      userDropdown.style.left = `${rect.left}px`;
+      userDropdown.style.width = `${rect.width}px`;
+    });
+    userBtn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') userBtn.click(); });
+    document.addEventListener('click', (e) => {
+      if (!userBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+        userDropdown.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('signout-btn').addEventListener('click', async () => {
+      showConfirm('Sign Out', 'Are you sure you want to sign out?', async () => {
+        await signOutUser();
+        window.location.replace('login.html');
+      }, { confirmText: 'Sign Out', danger: false });
+    });
+
+    // ── Load dashboard data ─────────────────────────────────
+    async function loadDashboard() {
+      const result = await getEvents({ limit: 20 });
+      
+      if (!result.ok) {
+        // Show empty state (backend may not be running)
+        renderEmptyDashboard();
+        return;
+      }
+
+      const events = result.data?.events || [];
+      renderStats(events);
+      renderEventsList(events);
+      renderUpcomingEvents(events);
+      renderBudgetWidget(events);
+      renderTasksWidget();
+    }
+
+    function renderStats(events) {
+      const now = new Date();
+      const upcoming = events.filter(e => new Date(e.event_date) >= now);
+      const totalBudget = events.reduce((sum, e) => sum + (e.budget || 0), 0);
+      const totalGuests = events.reduce((sum, e) => sum + (e.guest_count || 0), 0);
+
+      const statsGrid = document.getElementById('stats-grid');
+      statsGrid.innerHTML = `
+        <div class="stat-card" style="--accent:#7C3AED;">
+          <div style="position:absolute;top:-10px;right:-10px;width:80px;height:80px;background:radial-gradient(circle,rgba(124,58,237,0.4),transparent);border-radius:50%;filter:blur(20px);" aria-hidden="true"></div>
+          <div class="stat-card-header">
+            <div class="stat-icon" style="background:rgba(124,58,237,0.15);color:#A78BFA;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <span class="stat-trend up">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>
+              All time
+            </span>
+          </div>
+          <div class="stat-value" aria-label="${events.length} total events">${events.length}</div>
+          <div class="stat-label">Total Events</div>
+        </div>
+
+        <div class="stat-card">
+          <div style="position:absolute;top:-10px;right:-10px;width:80px;height:80px;background:radial-gradient(circle,rgba(6,182,212,0.3),transparent);border-radius:50%;filter:blur(20px);" aria-hidden="true"></div>
+          <div class="stat-card-header">
+            <div class="stat-icon" style="background:rgba(6,182,212,0.15);color:#22D3EE;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+          </div>
+          <div class="stat-value" aria-label="${upcoming.length} upcoming events">${upcoming.length}</div>
+          <div class="stat-label">Upcoming Events</div>
+        </div>
+
+        <div class="stat-card">
+          <div style="position:absolute;top:-10px;right:-10px;width:80px;height:80px;background:radial-gradient(circle,rgba(16,185,129,0.3),transparent);border-radius:50%;filter:blur(20px);" aria-hidden="true"></div>
+          <div class="stat-card-header">
+            <div class="stat-icon" style="background:rgba(16,185,129,0.15);color:#34D399;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+          </div>
+          <div class="stat-value" aria-label="Total budget ${formatCurrency(totalBudget)}">${formatCurrency(totalBudget)}</div>
+          <div class="stat-label">Total Budget</div>
+        </div>
+
+        <div class="stat-card">
+          <div style="position:absolute;top:-10px;right:-10px;width:80px;height:80px;background:radial-gradient(circle,rgba(245,158,11,0.3),transparent);border-radius:50%;filter:blur(20px);" aria-hidden="true"></div>
+          <div class="stat-card-header">
+            <div class="stat-icon" style="background:rgba(245,158,11,0.15);color:#FCD34D;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            </div>
+          </div>
+          <div class="stat-value" aria-label="${totalGuests} total guests">${totalGuests}</div>
+          <div class="stat-label">Total Guests</div>
+        </div>
+      `;
+    }
+
+    function renderEventsList(events) {
+      const container = document.getElementById('events-list');
+      if (events.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <h3 class="text-lg font-semibold">No events yet</h3>
+            <p class="text-secondary text-sm">Create your first event to get started!</p>
+            <a href="create-event.html" class="btn btn-primary mt-4" id="empty-create-event-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Create Your First Event
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = events.map(event => {
+        const days = daysUntil(event.event_date);
+        const countdown = formatCountdown(days);
+        const emoji = getEventEmoji(event.event_type);
+        
+        return `
+          <a href="planner.html?event=${event.id}" class="upcoming-event-item" 
+             id="event-item-${event.id}" 
+             aria-label="${escapeHtml(event.name)}, ${formatDate(event.event_date)}">
+            <div class="event-date-badge" aria-hidden="true">
+              <div class="event-date-day">${new Date(event.event_date).getDate()}</div>
+              <div class="event-date-month">${new Date(event.event_date).toLocaleString('en-IN', {month:'short'})}</div>
+            </div>
+            <div class="event-info">
+              <div class="event-info-name">${emoji} ${escapeHtml(event.name)}</div>
+              <div class="event-info-meta">${escapeHtml(event.location || 'Location TBD')} · ${formatCurrency(event.budget || 0)} · ${event.guest_count || 0} guests</div>
+            </div>
+            <div class="event-countdown">${countdown}</div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    function renderUpcomingEvents(events) {
+      const now = new Date();
+      const upcoming = events
+        .filter(e => new Date(e.event_date) >= now)
+        .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
+        .slice(0, 3);
+
+      const container = document.getElementById('upcoming-events');
+      if (upcoming.length === 0) {
+        container.innerHTML = `<p class="text-secondary text-sm text-center" style="padding:var(--space-4);">No upcoming events</p>`;
+        return;
+      }
+
+      container.innerHTML = upcoming.map(event => {
+        const days = daysUntil(event.event_date);
+        return `
+          <a href="planner.html?event=${event.id}" class="upcoming-event-item"
+             aria-label="${escapeHtml(event.name)}, ${formatDate(event.event_date)}">
+            <div class="event-date-badge" aria-hidden="true">
+              <div class="event-date-day">${new Date(event.event_date).getDate()}</div>
+              <div class="event-date-month">${new Date(event.event_date).toLocaleString('en-IN',{month:'short'})}</div>
+            </div>
+            <div class="event-info">
+              <div class="event-info-name">${escapeHtml(event.name)}</div>
+              <div class="event-info-meta">${event.guest_count || 0} guests</div>
+            </div>
+            <div class="event-countdown">${formatCountdown(days)}</div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    function renderBudgetWidget(events) {
+      const container = document.getElementById('budget-chart-area');
+      const detailsContainer = document.getElementById('budget-details');
+      
+      if (events.length === 0) {
+        container.innerHTML = `<p class="text-secondary text-sm text-center" style="padding:var(--space-8);">No budget data yet</p>`;
+        return;
+      }
+
+      const totalBudget = events.reduce((sum, e) => sum + (e.budget || 0), 0);
+      const totalSpent = events.reduce((sum, e) => sum + (e.spent || 0), 0);
+      const remaining = totalBudget - totalSpent;
+
+      container.innerHTML = `<canvas id="budget-donut" aria-label="Budget overview chart" role="img"></canvas>`;
+      
+      const ctx = document.getElementById('budget-donut').getContext('2d');
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Spent', 'Remaining'],
+          datasets: [{
+            data: [totalSpent || 1, remaining > 0 ? remaining : 0],
+            backgroundColor: ['rgba(124,58,237,0.8)', 'rgba(255,255,255,0.08)'],
+            borderColor: ['#7C3AED', 'rgba(255,255,255,0.1)'],
+            borderWidth: 2,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          cutout: '75%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ` ${formatCurrency(ctx.parsed)}`
+              }
+            }
+          }
+        }
+      });
+
+      detailsContainer.innerHTML = `
+        <div class="budget-summary-row">
+          <div class="budget-label">
+            <div class="budget-dot" style="background:#7C3AED;" aria-hidden="true"></div>
+            <span>Total Budget</span>
+          </div>
+          <span class="budget-amount">${formatCurrency(totalBudget)}</span>
+        </div>
+        <div class="budget-summary-row">
+          <div class="budget-label">
+            <div class="budget-dot" style="background:rgba(255,255,255,0.2);" aria-hidden="true"></div>
+            <span>Remaining</span>
+          </div>
+          <span class="budget-amount" style="color:${remaining < 0 ? 'var(--color-error)' : 'var(--color-success)'}">
+            ${formatCurrency(Math.abs(remaining))}${remaining < 0 ? ' over' : ''}
+          </span>
+        </div>
+      `;
+    }
+
+    function renderTasksWidget() {
+      const container = document.getElementById('tasks-widget');
+      container.innerHTML = `<p class="text-secondary text-sm text-center" style="padding:var(--space-4);">Select an event to view tasks</p>`;
+    }
+
+    function renderEmptyDashboard() {
+      // Backend not connected – show friendly empty state
+      const statsGrid = document.getElementById('stats-grid');
+      statsGrid.innerHTML = `
+        <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Total Events</div></div>
+        <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Upcoming Events</div></div>
+        <div class="stat-card"><div class="stat-value">₹0</div><div class="stat-label">Total Budget</div></div>
+        <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Total Guests</div></div>
+      `;
+      renderEventsList([]);
+      document.getElementById('upcoming-events').innerHTML = `<p class="text-secondary text-sm text-center" style="padding:var(--space-4);">No upcoming events</p>`;
+      document.getElementById('budget-chart-area').innerHTML = `<p class="text-secondary text-sm text-center" style="padding:var(--space-4);">No budget data</p>`;
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>
