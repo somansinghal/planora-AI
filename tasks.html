@@ -406,10 +406,18 @@
       }
     });
 
-    document.getElementById('event-selector').addEventListener('change', (e) => {
-      selectedEventId = e.target.value;
-      localStorage.setItem('planora_active_event_id', selectedEventId);
-      refreshTasks();
+    // Reactive refresh when data changes in other tabs or workspace views
+    window.addEventListener('planora:data-updated', () => refreshTasks());
+    window.addEventListener('storage', (e) => {
+      if (!e.key || e.key.startsWith('planora_')) {
+        refreshTasks();
+      }
+    });
+    window.addEventListener('pageshow', () => refreshTasks());
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        refreshTasks();
+      }
     });
 
     loadEvents();

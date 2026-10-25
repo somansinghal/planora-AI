@@ -24,6 +24,18 @@ export const firebaseConfig = {
   appId: window.__PLANORA_FIREBASE_APP_ID__ || "REPLACE_WITH_YOUR_APP_ID",
 };
 
+/**
+ * Returns true if real Firebase Web credentials are configured.
+ */
+export function isFirebaseClientConfigured() {
+  return (
+    firebaseConfig.apiKey &&
+    !firebaseConfig.apiKey.startsWith("REPLACE_") &&
+    firebaseConfig.projectId &&
+    !firebaseConfig.projectId.startsWith("REPLACE_")
+  );
+}
+
 // ── Backend API Configuration ───────────────────────────────
 export const API_BASE_URL = window.__PLANORA_API_URL__ || "http://localhost:8000";
 

@@ -2,9 +2,13 @@
   "name": "planora-ai",
   "version": "1.0.0",
   "description": "Planora AI – AI-powered event-planning and event-management SaaS",
+  "type": "module",
   "scripts": {
     "dev:backend": "cd backend && python3 -m uvicorn app.main:app --reload --port 8000",
     "dev:frontend": "python3 -m http.server 3000",
+    "test": "node tests/test_demo_sync.js && python3 tests/test_seo_and_demo.py",
+    "test:demo": "node tests/test_demo_sync.js",
+    "test:seo": "python3 tests/test_seo_and_demo.py",
     "test:api": "cd backend && python3 -m unittest discover -s tests -p 'test_*.py' -v",
     "test:browser": "playwright test",
     "capture:screenshots": "node tests/playwright/capture-screenshots.js",

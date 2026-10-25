@@ -13,8 +13,10 @@ import { API_BASE_URL, APP_CONFIG } from './firebase-config.js';
 import {
   isJudgeDemoMode,
   getDemoEvent,
+  updateDemoEvent,
   getDemoExpenses,
   addDemoExpense,
+  updateDemoExpense,
   deleteDemoExpense,
   getDemoTasks,
   addDemoTask,
@@ -22,9 +24,12 @@ import {
   deleteDemoTask,
   getDemoVendors,
   addDemoVendor,
+  updateDemoVendor,
+  deleteDemoVendor,
   getDemoGuests,
   addDemoGuest,
   updateDemoGuest,
+  deleteDemoGuest,
   getDemoPlans,
   getDemoBudgetSummary,
   getDemoGuestSummary,
@@ -172,7 +177,8 @@ export async function getEvent(eventId) {
 
 export async function updateEvent(eventId, data) {
   if (isJudgeDemoMode()) {
-    return { ok: true, status: 200, data: { ...getDemoEvent(), ...data }, error: null };
+    const updated = updateDemoEvent(data);
+    return { ok: true, status: 200, data: updated, error: null };
   }
   return api.patch(`/api/events/${eventId}`, data);
 }
@@ -225,7 +231,8 @@ export async function createExpense(eventId, data) {
 
 export async function updateExpense(expenseId, data) {
   if (isJudgeDemoMode()) {
-    return { ok: true, status: 200, data: { id: expenseId, ...data }, error: null };
+    const updated = updateDemoExpense(expenseId, data);
+    return { ok: true, status: 200, data: updated, error: null };
   }
   return api.patch(`/api/expenses/${expenseId}`, data);
 }
@@ -295,13 +302,15 @@ export async function createVendor(eventId, data) {
 
 export async function updateVendor(vendorId, data) {
   if (isJudgeDemoMode()) {
-    return { ok: true, status: 200, data: { id: vendorId, ...data }, error: null };
+    const updated = updateDemoVendor(vendorId, data);
+    return { ok: true, status: 200, data: updated, error: null };
   }
   return api.patch(`/api/vendors/${vendorId}`, data);
 }
 
 export async function deleteVendor(vendorId) {
   if (isJudgeDemoMode()) {
+    deleteDemoVendor(vendorId);
     return { ok: true, status: 200, data: { success: true }, error: null };
   }
   return api.delete(`/api/vendors/${vendorId}`);
@@ -335,6 +344,7 @@ export async function updateGuest(guestId, data) {
 
 export async function deleteGuest(guestId) {
   if (isJudgeDemoMode()) {
+    deleteDemoGuest(guestId);
     return { ok: true, status: 200, data: { success: true }, error: null };
   }
   return api.delete(`/api/guests/${guestId}`);

@@ -1,12 +1,18 @@
-# Environment & Secrets
+# Environment & Secrets (NEVER commit secrets or real credentials)
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 backend/.env
+backend/.env.*
+!backend/.env.example
 *.pem
 *.key
+*.crt
 serviceAccountKey.json
+*service-account*.json
 firebase-adminsdk*.json
+credentials.json
+client_secret*.json
 
 # Python
 __pycache__/

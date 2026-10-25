@@ -150,14 +150,19 @@ planora-ai/
 
 ### Prerequisites
 - Python 3.10 or higher.
+- Node.js 18+ (for automated tests).
 - A modern web browser.
 
 ### 1. Clone & Configure Environment
 ```bash
 git clone https://github.com/somansinghal/planora-ai.git
 cd planora-ai
-cp .env.example backend/.env
+
+# Copy environment templates
+cp .env.example .env
+cp backend/.env.example backend/.env
 ```
+See [Environment Configuration Guide](docs/ENVIRONMENT_SETUP.md) for full configuration inventory and options.
 
 ### 2. Start the FastAPI Backend
 ```bash
@@ -178,28 +183,45 @@ Open **[http://localhost:3000](http://localhost:3000)** or test the demo directl
 
 ## 🧪 Automated Testing & Verification
 
-Planora AI includes 2 comprehensive automated test suites covering 29 integration points:
+Planora AI includes 3 comprehensive automated test suites covering 68 integration points:
 
-### 1. Backend Security & API Test Suite (15 Tests)
+### 1. Full Test Suite (68 Tests)
+```bash
+npm test
+```
+
+### 2. Judge Demo & Expense Synchronization Suite (37 Tests)
+Validates expense creation, synchronous dashboard recalculations, remaining balance, category breakdowns, task toggles, vendor booking, guest RSVP tracking, and reactive cross-view sync:
+```bash
+npm run test:demo
+# or: node tests/test_demo_sync.js
+```
+*Result: 37/37 tests passing.*
+
+### 3. SEO, Metadata & Security Protection Suite (16 Tests)
+Validates brand assets, 1200×630 social preview dimensions, canonical URLs, meta descriptions, robots.txt directives, sitemap XML integrity, private route `noindex` enforcement, verified creator social links, and secret exclusions:
+```bash
+npm run test:seo
+# or: python3 tests/test_seo_and_demo.py
+```
+*Result: 16/16 tests passing.*
+
+### 4. Backend REST API Suite (15 Tests)
 Validates health endpoints, unauthenticated rejection (401), token validation, user profile retrieval, event creation validation, cross-user authorization barriers (403), budget math, task workflows, RSVP summaries, AI plan generation, contextual copilot, master reports, and cascading deletions:
 ```bash
-cd backend
-python3 -m unittest discover -s tests -p "test_*.py" -v
+PYTHONPATH=backend python3 -m unittest discover -s backend/tests -p "test_*.py" -v
 ```
-*Result: 15/15 tests passing in 0.08 seconds.*
-
-### 2. SEO, Social Profiles & Judge Demo Sandbox Suite (14 Tests)
-Validates brand assets, 1200×630 social preview dimensions, canonical URLs, meta descriptions, robots.txt directives, sitemap XML integrity, private route `noindex` enforcement, verified creator social links, accessible link labels, and Judge Demo storage isolation:
-```bash
-python3 tests/test_seo_and_demo.py
-```
-*Result: 14/14 tests passing in 0.07 seconds.*
+*Result: 15/15 tests passing.*
 
 ---
 
 ## 📖 Complete Documentation Library
 
 Detailed engineering guides are located in the `docs/` directory:
+- [Environment Setup & Configuration Guide](docs/ENVIRONMENT_SETUP.md) *(Essential Configuration Inventory)*
+- [API Configuration & Security Audit](docs/API_CONFIGURATION_AUDIT.md) *(API Integrations & Keys Audit)*
+- [Judge Demo Bug Fixes & Sync Audit](docs/DEMO_BUG_FIXES.md) *(Expense Sync Bug Remediation)*
+- [Automated Testing & Verification Guide](docs/TESTING.md) *(Test Execution & Results)*
 - [Full Site Audit & Remediation Report](docs/FULL_SITE_AUDIT.md) *(Comprehensive Quality & Security Audit)*
 - [Judge Demo Mode Specification](docs/JUDGE_DEMO.md) *(Mandatory for Evaluators)*
 - [Demo Security & Isolation Audit](docs/DEMO_SECURITY_AUDIT.md)
@@ -217,7 +239,6 @@ Detailed engineering guides are located in the `docs/` directory:
 - [Accessibility Audit (WCAG AA)](docs/ACCESSIBILITY_AUDIT.md)
 - [Performance Audit](docs/PERFORMANCE_AUDIT.md)
 - [Test Strategy](docs/TEST_STRATEGY.md)
-- [Test Execution Report](docs/TEST_REPORT.md)
 - [Deployment Guide](docs/DEPLOYMENT_GUIDE.md)
 - [Environment Variables](docs/ENVIRONMENT_VARIABLES.md)
 - [Troubleshooting Guide](docs/TROUBLESHOOTING.md)

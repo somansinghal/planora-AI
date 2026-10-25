@@ -379,10 +379,15 @@
       const totalSpent = events.reduce((sum, e) => sum + (e.spent || 0), 0);
       const remaining = totalBudget - totalSpent;
 
+      if (window._planoraBudgetDonutChart) {
+        window._planoraBudgetDonutChart.destroy();
+        window._planoraBudgetDonutChart = null;
+      }
+
       container.innerHTML = `<canvas id="budget-donut" aria-label="Budget overview chart" role="img"></canvas>`;
       
       const ctx = document.getElementById('budget-donut').getContext('2d');
-      new Chart(ctx, {
+      window._planoraBudgetDonutChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
           labels: ['Spent', 'Remaining'],
@@ -445,6 +450,20 @@
       document.getElementById('upcoming-events').innerHTML = `<p class="text-secondary text-sm text-center" style="padding:var(--space-4);">No upcoming events</p>`;
       document.getElementById('budget-chart-area').innerHTML = `<p class="text-secondary text-sm text-center" style="padding:var(--space-4);">No budget data</p>`;
     }
+
+    // Auto-refresh when workspace data updates in demo or other tabs
+    window.addEventListener('planora:data-updated', () => loadDashboard());
+    window.addEventListener('storage', (e) => {
+      if (!e.key || e.key.startsWith('planora_')) {
+        loadDashboard();
+      }
+    });
+    window.addEventListener('pageshow', () => loadDashboard());
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        loadDashboard();
+      }
+    });
 
     loadDashboard();
   </script>
