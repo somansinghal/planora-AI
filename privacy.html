@@ -70,43 +70,43 @@
 
       <div class="card" style="padding: var(--space-8); line-height: 1.7; color: var(--color-text-secondary); display: flex; flex-direction: column; gap: var(--space-6); font-size: var(--text-sm);">
         <section>
-          <h2 style="color: var(--color-text-primary); font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-2);">1. Introduction & Ownership</h2>
+          <h2 style="color: var(--color-text-primary); font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-2);">1. Introduction & Project Status</h2>
           <p>
-            Planora AI is an event management platform built and maintained by founder and software engineer Soman Singhal. We are committed to protecting the privacy, security, and integrity of your personal information and celebration data.
+            Planora AI is an independent software application developed and maintained by full-stack engineer Soman Singhal. This Privacy Policy outlines our real-world data collection, processing, and storage practices.
+          </p>
+          <p style="font-size: var(--text-xs); color: var(--color-text-tertiary); margin-top: var(--space-2); background: rgba(255,255,255,0.03); padding: var(--space-3); border-radius: var(--radius-sm); border-left: 2px solid var(--color-border-subtle);">
+            <strong>Notice on Legal Review:</strong> This document is developer-drafted to accurately represent the application's actual data pipelines. It has not received formal independent legal counsel review. Users requiring custom enterprise data processing agreements (DPAs) should contact the developer.
           </p>
         </section>
 
         <section>
-          <h2 style="color: var(--color-text-primary); font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-2);">2. Information We Collect</h2>
-          <p>We collect only the information necessary to provide our event planning SaaS:</p>
-          <ul style="padding-left: var(--space-5); list-style: disc; margin-top: var(--space-2);">
-            <li><strong>Account Information:</strong> Email address, display name, and authentication identifiers provided through secure Firebase Authentication.</li>
-            <li><strong>Event Data:</strong> Event names, dates, budgets, guest counts, dietary notes, task items, vendor quotes, and itemized expenses.</li>
-            <li><strong>AI Prompt Context:</strong> Text inputs provided to the AI Event Studio and Copilot to generate relevant event recommendations.</li>
+          <h2 style="color: var(--color-text-primary); font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-2);">2. Information We Collect & Sub-processors</h2>
+          <p>We process only data required to deliver core event workspace functionality:</p>
+          <ul style="padding-left: var(--space-5); list-style: disc; margin-top: var(--space-2); display: flex; flex-direction: column; gap: var(--space-2);">
+            <li><strong>Account Identity:</strong> Email address, display name, and unique user ID (UID) managed via <em>Google Firebase Authentication</em>.</li>
+            <li><strong>Workspace & Operational Data:</strong> Event names, dates, budgets, itemized expenses, vendor details, and guest RSVP names stored in <em>Google Cloud Firestore</em> under strict per-user security rules.</li>
+            <li><strong>AI Inference Inputs:</strong> Event descriptions and chat queries processed server-side via <em>Groq Cloud</em> (LLaMA 3.1 model). Prompts are used purely for generating immediate responses and are not sold or retained for third-party model training.</li>
           </ul>
         </section>
 
         <section>
-          <h2 style="color: var(--color-text-primary); font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-2);">3. How We Use and Protect Data</h2>
+          <h2 style="color: var(--color-text-primary); font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-2);">3. How We Protect Your Data</h2>
           <p>
-            Your event data is used solely to generate your plans, balance your budgets, coordinate tasks, and provide intelligent suggestions. We never sell your personal data or share private guest rosters with third-party advertisers.
-          </p>
-          <p>
-            All backend requests enforce token authentication and strict user-ownership validation to prevent unauthorized access across accounts.
+            Your event workspaces are cryptographically isolated. Every database request enforces server-side token validation and resource ownership checks. We do not sell user data, run third-party advertising trackers, or share guest contact details.
           </p>
         </section>
 
         <section>
           <h2 style="color: var(--color-text-primary); font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-2);">4. Data Retention & Deletion</h2>
           <p>
-            You retain 100% ownership of your data. When you delete an event or account within Planora AI, the associated expenses, tasks, vendors, and guest rosters are permanently purged.
+            You retain complete ownership of your data. When an event or user account is deleted, all associated expenses, tasks, guest lists, and AI plans are permanently purged from the database.
           </p>
         </section>
 
         <section>
-          <h2 style="color: var(--color-text-primary); font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-2);">5. Contact Us</h2>
+          <h2 style="color: var(--color-text-primary); font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-2);">5. Contact & Privacy Requests</h2>
           <p>
-            If you have questions or inquiries regarding your data, please contact the developer via <a href="https://somansinghal.vercel.app/" target="_blank" rel="noopener noreferrer" style="color: #A78BFA;">Portfolio</a> or <a href="https://github.com/somansinghal" target="_blank" rel="noopener noreferrer" style="color: #A78BFA;">GitHub</a>.
+            For privacy inquiries or data export requests, reach out directly to founder Soman Singhal via his verified <a href="https://somansinghal.vercel.app/" target="_blank" rel="noopener noreferrer" style="color: #A78BFA;">Portfolio Contact</a> or open an inquiry on <a href="https://github.com/somansinghal" target="_blank" rel="noopener noreferrer" style="color: #A78BFA;">GitHub</a>.
           </p>
         </section>
       </div>

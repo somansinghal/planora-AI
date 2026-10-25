@@ -200,6 +200,7 @@ python3 tests/test_seo_and_demo.py
 ## 📖 Complete Documentation Library
 
 Detailed engineering guides are located in the `docs/` directory:
+- [Full Site Audit & Remediation Report](docs/FULL_SITE_AUDIT.md) *(Comprehensive Quality & Security Audit)*
 - [Judge Demo Mode Specification](docs/JUDGE_DEMO.md) *(Mandatory for Evaluators)*
 - [Demo Security & Isolation Audit](docs/DEMO_SECURITY_AUDIT.md)
 - [Technical SEO Audit](docs/SEO_AUDIT.md)

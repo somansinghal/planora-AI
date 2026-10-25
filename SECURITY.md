@@ -12,9 +12,9 @@ Planora AI takes user data security, authentication integrity, and privacy serio
 
 If you discover a security vulnerability within Planora AI, please report it responsibly:
 
-1. **Email**: Send vulnerability disclosures to **security@planora.ai** (or contact the repository maintainers directly).
-2. **Do Not File Public Issues**: Do not disclose vulnerabilities in public GitHub issues.
-3. **Response Time**: We acknowledge receipt of vulnerability reports within 48 hours.
+1. **Responsible Disclosure**: Contact founder Soman Singhal directly via his verified [Portfolio Contact Form](https://somansinghal.vercel.app/) or open a private security advisory on [GitHub](https://github.com/somansinghal).
+2. **Do Not File Public Issues**: Please avoid disclosing suspected vulnerabilities in public issue trackers.
+3. **Response Time**: All verified reports are acknowledged within 48 hours.
 
 ## Security Architecture
 
