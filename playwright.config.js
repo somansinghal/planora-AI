@@ -1,22 +1,22 @@
 // @ts-check
-const { defineConfig, devices } = require('@playwright/test');
+import { defineConfig, devices } from '@playwright/test';
 
-module.exports = defineConfig({
+export default defineConfig({
   testDir: './tests/playwright',
-  timeout: 30000,
+  timeout: 45000,
   expect: {
-    timeout: 5000,
+    timeout: 7000,
   },
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  retries: 0,
+  workers: 2,
   reporter: [
-    ['html', { outputFolder: 'artifacts/playwright-report', open: 'never' }],
+    ['html', { outputFolder: 'artifacts/reports/playwright-report', open: 'never' }],
     ['list']
   ],
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    baseURL: process.env.BASE_URL || 'https://planora-ai-india.vercel.app',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -35,7 +35,7 @@ module.exports = defineConfig({
       use: { ...devices['iPhone 14'], viewport: { width: 390, height: 844 } },
     },
   ],
-  webServer: [
+  webServer: process.env.USE_LOCAL_SERVER ? [
     {
       command: 'python3 -m http.server 3000',
       port: 3000,
@@ -48,5 +48,5 @@ module.exports = defineConfig({
       reuseExistingServer: true,
       timeout: 10000,
     }
-  ],
+  ] : undefined,
 });

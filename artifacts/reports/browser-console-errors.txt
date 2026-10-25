@@ -1,0 +1,1 @@
+No fatal browser console errors detected.

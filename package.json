@@ -11,8 +11,12 @@
     "test:seo": "python3 tests/test_seo_and_demo.py",
     "test:api": "cd backend && python3 -m unittest discover -s tests -p 'test_*.py' -v",
     "test:browser": "playwright test",
+    "test:e2e": "playwright test",
+    "test:e2e:report": "playwright show-report artifacts/playwright-report",
     "capture:screenshots": "node tests/playwright/capture-screenshots.js",
-    "record:video": "node tests/playwright/record-demo-video.js"
+    "screenshots": "node tests/playwright/capture-screenshots.js",
+    "record:video": "node tests/playwright/record-demo-video.js",
+    "demo:record": "node tests/playwright/record-demo-video.js"
   },
   "keywords": [
     "event-planning",
@@ -25,6 +29,6 @@
   "author": "Planora AI Contributors",
   "license": "MIT",
   "devDependencies": {
-    "@playwright/test": "^1.48.0"
+    "@playwright/test": "^1.64.1"
   }
 }

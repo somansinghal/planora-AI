@@ -34,6 +34,7 @@ import {
   getDemoBudgetSummary,
   getDemoGuestSummary,
   queryDemoCopilot,
+  getDemoData,
   DEMO_USER
 } from './demo-mode.js';
 
@@ -382,6 +383,64 @@ export async function getGuestSummary(eventId) {
     return { ok: true, status: 200, data: getDemoGuestSummary(), error: null };
   }
   return api.get(`/api/events/${eventId}/guests/summary`);
+}
+
+// ── Reports API ───────────────────────────────────────────────
+
+export async function getEventReport(eventId) {
+  if (isJudgeDemoMode()) {
+    const data = getDemoData();
+    const ev = data.event || {};
+    const expenses = data.expenses || [];
+    const tasks = data.tasks || [];
+    const vendors = data.vendors || [];
+    const guests = data.guests || [];
+    const total_budget = Number(ev.budget || 0);
+    const total_est = expenses.reduce((s, e) => s + Number(e.estimated_amount || e.amount || 0), 0);
+    const total_act = expenses.reduce((s, e) => s + Number(e.actual_amount || (e.is_paid ? (e.paid_amount || e.amount || 0) : 0)), 0);
+    const completed_tasks = tasks.filter(t => t.status === 'done' || t.status === 'completed').length;
+    const in_progress = tasks.filter(t => t.status === 'in_progress').length;
+    const todo = tasks.filter(t => t.status === 'todo').length;
+    const booked_vendors = vendors.filter(v => v.status === 'booked' || v.status === 'contract_signed').length;
+    const confirmed_guests = guests.filter(g => g.rsvp_status === 'attending' || g.rsvp_status === 'confirmed').length;
+    const pending_guests = guests.filter(g => g.rsvp_status === 'pending' || !g.rsvp_status).length;
+    
+    return {
+      ok: true,
+      status: 200,
+      data: {
+        event: ev,
+        budget_overview: {
+          total_budget,
+          currency: ev.currency || 'INR',
+          total_estimated: total_est,
+          total_actual: total_act,
+          remaining: total_budget - total_act,
+          utilization_pct: total_budget > 0 ? Math.round((total_act / total_budget) * 100) : 0,
+          expenses_count: expenses.length
+        },
+        tasks_overview: {
+          total_tasks: tasks.length,
+          completed: completed_tasks,
+          in_progress,
+          todo,
+          progress_pct: tasks.length > 0 ? Math.round((completed_tasks / tasks.length) * 100) : 0
+        },
+        vendors_overview: {
+          total_vendors: vendors.length,
+          booked_count: booked_vendors
+        },
+        guests_overview: {
+          total_invited: guests.length,
+          confirmed: confirmed_guests,
+          pending: pending_guests
+        },
+        latest_plan: data.plans && data.plans.length > 0 ? data.plans[0] : null
+      },
+      error: null
+    };
+  }
+  return api.get(`/api/events/${eventId}/report`);
 }
 
 export function getExportUrl(eventId, exportType = 'expenses') {

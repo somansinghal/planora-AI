@@ -224,3 +224,4 @@ initFirebase().catch(err => {
 });
 
 export { initFirebase };
+export { redirectIfAuthenticated } from './auth-guard.js';
