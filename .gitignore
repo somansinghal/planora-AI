@@ -12,7 +12,8 @@ serviceAccountKey.json
 *service-account*.json
 firebase-adminsdk*.json
 credentials.json
-client_secret*.json
+client_secret*.json 
+planora-ai-india-firebase-adminsdk-fbsvc-fe67b4065f.json
 
 # Python
 __pycache__/

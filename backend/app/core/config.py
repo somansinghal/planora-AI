@@ -6,8 +6,20 @@ All secrets must be set via environment variables, never hardcoded.
 """
 
 import os
+from pathlib import Path
 from typing import List
 from functools import lru_cache
+
+try:
+    from dotenv import load_dotenv
+    # Load backend/.env if present; fallback to standard search without overriding existing env
+    _backend_env = Path(__file__).resolve().parent.parent.parent / ".env"
+    if _backend_env.is_file():
+        load_dotenv(dotenv_path=_backend_env, override=False)
+    else:
+        load_dotenv(override=False)
+except ImportError:
+    pass
 
 
 class Settings:
@@ -30,7 +42,7 @@ class Settings:
 
     # ── Firebase Admin ────────────────────────────────────────
     # NEVER expose these in frontend code
-    FIREBASE_PROJECT_ID: str = os.getenv("FIREBASE_PROJECT_ID", "planora-ai")
+    FIREBASE_PROJECT_ID: str = os.getenv("FIREBASE_PROJECT_ID", "planora-ai-india")
     FIREBASE_ADMIN_CREDENTIALS: str = os.getenv("FIREBASE_ADMIN_CREDENTIALS_PATH", "")
 
     # ── AI Provider ───────────────────────────────────────────
