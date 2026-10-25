@@ -6,7 +6,13 @@
   <title>Create Account – Planora AI</title>
   <meta name="description" content="Create your free Planora AI account and start planning events with the power of AI.">
   <meta name="robots" content="noindex, nofollow">
-  <link rel="icon" type="image/png" href="assets/logo/planora-logo.png">
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="alternate icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -191,6 +197,17 @@
           <button type="submit" class="btn btn-primary w-full" id="signup-submit-btn">
             Create Account
           </button>
+
+          <div class="auth-divider" style="display:flex;align-items:center;gap:12px;margin:var(--space-4) 0;">
+            <span style="flex:1;height:1px;background:var(--color-border-subtle);"></span>
+            <span style="font-size:var(--text-xs);color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:0.5px;">Or Evaluation Demo</span>
+            <span style="flex:1;height:1px;background:var(--color-border-subtle);"></span>
+          </div>
+
+          <a href="dashboard.html?demo=true" class="btn btn-secondary w-full" id="btn-signup-demo" style="display:flex;align-items:center;justify-content:center;gap:8px;border-color:rgba(124,58,237,0.4);color:#C4B5FD;background:rgba(124,58,237,0.08);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span>Explore Judge Demo (No login required)</span>
+          </a>
         </form>
 
         <p class="auth-footer-link">

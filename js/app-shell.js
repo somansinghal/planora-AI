@@ -1,18 +1,26 @@
-/**
- * Planora AI – Shared App Shell HTML
- * 
- * Sidebar navigation and topbar used across all app pages.
- * Included via JS injection to avoid duplication.
- */
+import { isJudgeDemoMode, resetDemoData, exitJudgeDemoMode } from './demo-mode.js';
+
+// Expose demo helpers globally for inline onclick handlers
+if (typeof window !== 'undefined') {
+  window.planoraResetDemo = () => {
+    resetDemoData();
+    window.location.reload();
+  };
+  window.planoraExitDemo = () => {
+    exitJudgeDemoMode();
+  };
+}
 
 export function getAppShellHTML(activePage = '') {
+  const isDemo = isJudgeDemoMode();
   return `
     <!-- Sidebar -->
     <aside class="sidebar" id="app-sidebar" role="navigation" aria-label="Application navigation">
       <div class="sidebar-header">
-        <a href="dashboard.html" class="sidebar-logo" aria-label="Planora AI Dashboard">
+        <a href="${isDemo ? 'dashboard.html?demo=true' : 'dashboard.html'}" class="sidebar-logo" aria-label="Planora AI Dashboard">
           <img src="assets/logo/planora-logo.png" alt="Planora AI" width="28" height="28">
           <span class="sidebar-logo-text">Planora AI</span>
+          ${isDemo ? `<span style="background:linear-gradient(135deg, #7C3AED, #4F46E5);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;letter-spacing:0.5px;margin-left:4px;">DEMO</span>` : ''}
         </a>
         <button class="sidebar-toggle" id="sidebar-toggle-btn" aria-label="Toggle sidebar">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -112,6 +120,7 @@ export function getAppShellHTML(activePage = '') {
 }
 
 export function getTopbarHTML(title, subtitle = '') {
+  const isDemo = isJudgeDemoMode();
   return `
     <header class="app-topbar" role="banner">
       <div class="app-topbar-left">
@@ -119,15 +128,28 @@ export function getTopbarHTML(title, subtitle = '') {
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
         <div>
-          <h1 class="topbar-title">${title}</h1>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <h1 class="topbar-title">${title}</h1>
+            ${isDemo ? `<span style="background:rgba(124,58,237,0.18);color:#C4B5FD;border:1px solid rgba(124,58,237,0.4);font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;letter-spacing:0.3px;">DEMO SANDBOX</span>` : ''}
+          </div>
           ${subtitle ? `<p class="topbar-subtitle">${subtitle}</p>` : ''}
         </div>
       </div>
-      <div class="app-topbar-right">
-        <a href="create-event.html" class="btn btn-primary btn-sm" id="topbar-create-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          New Event
-        </a>
+      <div class="app-topbar-right" style="display:flex;align-items:center;gap:8px;">
+        ${isDemo ? `
+          <button onclick="window.planoraResetDemo && window.planoraResetDemo()" class="btn btn-secondary btn-sm" id="btn-topbar-reset-demo" title="Reset sample data">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            Reset Data
+          </button>
+          <button onclick="window.planoraExitDemo && window.planoraExitDemo()" class="btn btn-ghost btn-sm" id="btn-topbar-exit-demo" style="color:var(--color-text-tertiary);" title="Exit demo">
+            Exit
+          </button>
+        ` : `
+          <a href="create-event.html" class="btn btn-primary btn-sm" id="topbar-create-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Event
+          </a>
+        `}
       </div>
     </header>
   `;

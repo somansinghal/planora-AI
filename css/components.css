@@ -714,3 +714,177 @@
   justify-content: center;
   padding: 0 3px;
 }
+
+/* ── Judge Demo Banner & Indicators ──────────────────── */
+.judge-demo-banner {
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(124, 58, 237, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(124, 58, 237, 0.15);
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-body);
+}
+
+.judge-demo-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.judge-demo-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.judge-demo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #7C3AED, #4F46E5);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: var(--font-bold);
+  letter-spacing: 0.6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+  white-space: nowrap;
+}
+
+.judge-demo-text {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.judge-demo-text strong {
+  color: #E2E8F0;
+}
+
+.judge-demo-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.judge-demo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: var(--font-semibold);
+  padding: 5px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  min-height: 32px;
+}
+
+.judge-demo-btn:focus-visible {
+  outline: 2px solid #A78BFA;
+  outline-offset: 2px;
+}
+
+.judge-demo-btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #F3F4F6;
+}
+
+.judge-demo-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+}
+
+.judge-demo-btn-exit {
+  background: transparent;
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #F87171;
+}
+
+.judge-demo-btn-exit:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: #EF4444;
+  color: #FCA5A5;
+}
+
+/* ── Footer Social Media & Accessible Link Styling ─── */
+.social-links-grid {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: var(--space-3);
+}
+
+.social-link-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.social-link-btn:hover {
+  background: rgba(124, 58, 237, 0.15);
+  border-color: rgba(124, 58, 237, 0.4);
+  color: #A78BFA;
+  transform: translateY(-2px);
+}
+
+.social-link-btn:focus-visible {
+  outline: 2px solid #A78BFA;
+  outline-offset: 2px;
+}
+
+.social-link-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Share button */
+.btn-share {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  color: #C4B5FD;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-share:hover {
+  background: rgba(124, 58, 237, 0.22);
+  border-color: rgba(124, 58, 237, 0.5);
+  color: #FFFFFF;
+}
+
+.btn-share:focus-visible {
+  outline: 2px solid #A78BFA;
+  outline-offset: 2px;
+}
+

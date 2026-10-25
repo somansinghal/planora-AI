@@ -12,6 +12,7 @@
  */
 
 import { onAuthStateChange, hasCompletedOnboarding } from './auth.js';
+import { isJudgeDemoMode, DEMO_USER, renderDemoBanner } from './demo-mode.js';
 
 const PUBLIC_PATHS = [
   'index.html', 'login.html', 'signup.html',
@@ -28,9 +29,15 @@ const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
 /**
  * Guard: ensure user is authenticated before rendering page.
- * Called from app pages that require authentication.
+ * Supports Judge Demo Mode seamlessly for zero-friction evaluation.
  */
 export async function requireAuth() {
+  // ── Judge Demo Mode Bypass: Isolated Sandbox ───────────────
+  if (isJudgeDemoMode()) {
+    renderDemoBanner();
+    return DEMO_USER;
+  }
+
   return new Promise((resolve) => {
     let resolved = false;
     let timeoutId;

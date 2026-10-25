@@ -140,3 +140,80 @@ test.describe('3. Event Planning & Management Workflows (Mocked Auth)', () => {
     await expect(page.locator('#app-sidebar')).toBeVisible();
   });
 });
+
+test.describe('4. Technical SEO & Verified Social Links', () => {
+  test('Public pages declare canonical tags and Open Graph metadata', async ({ page }) => {
+    await page.goto('/index.html');
+    
+    // Canonical URL
+    const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
+    expect(canonical).toBe('https://planora-ai-india.vercel.app/');
+
+    // Open Graph
+    const ogTitle = await page.locator('meta[property="og:title"]').getAttribute('content');
+    expect(ogTitle).toContain('Planora AI');
+    const ogImage = await page.locator('meta[property="og:image"]').getAttribute('content');
+    expect(ogImage).toContain('planora-ai-social-preview.png');
+  });
+
+  test('Public footer contains all 5 verified creator social links with security attributes', async ({ page }) => {
+    await page.goto('/index.html');
+    const footer = page.locator('footer.footer');
+    await expect(footer).toBeVisible();
+
+    const expectedLinks = [
+      'https://github.com/somansinghal',
+      'https://somansinghal.vercel.app/',
+      'https://www.linkedin.com/in/soman-singhal/',
+      'https://x.com/SomanSinghal',
+      'https://www.instagram.com/_somansinghal/'
+    ];
+
+    for (const url of expectedLinks) {
+      const link = footer.locator(`a[href="${url}"]`);
+      await expect(link).toBeVisible();
+      await expect(link).toHaveAttribute('target', '_blank');
+      await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    }
+  });
+
+  test('Private application pages declare noindex, nofollow directives', async ({ page }) => {
+    await page.goto('/dashboard.html');
+    const robots = await page.locator('meta[name="robots"]').getAttribute('content');
+    expect(robots).toBe('noindex, nofollow');
+  });
+});
+
+test.describe('5. Hackathon Judge Demo Mode (Isolated Sandbox)', () => {
+  test('Demo entry point on homepage navigates to demo sandbox without credentials', async ({ page }) => {
+    await page.goto('/index.html');
+    const demoBtn = page.locator('#hero-demo-btn');
+    await expect(demoBtn).toBeVisible();
+    await demoBtn.click();
+
+    await page.waitForURL(/dashboard\.html\?demo=true/);
+    await expect(page.locator('#planora-judge-demo-banner')).toBeVisible();
+    await expect(page.locator('#planora-judge-demo-banner')).toContainText('JUDGE DEMO MODE');
+  });
+
+  test('Demo dashboard loads pre-seeded Planora Showcase Wedding', async ({ page }) => {
+    await page.goto('/dashboard.html?demo=true');
+    await expect(page.locator('text=Planora Showcase Wedding')).toBeVisible();
+    await expect(page.locator('text=12,00,000')).toBeVisible();
+  });
+
+  test('Demo Reset Data button restores pristine sample state', async ({ page }) => {
+    await page.goto('/dashboard.html?demo=true');
+    const resetBtn = page.locator('#btn-reset-demo');
+    await expect(resetBtn).toBeVisible();
+  });
+
+  test('Exit Demo returns user to public homepage', async ({ page }) => {
+    await page.goto('/dashboard.html?demo=true');
+    const exitBtn = page.locator('#btn-exit-demo');
+    await expect(exitBtn).toBeVisible();
+    await exitBtn.click();
+    await page.waitForURL(/index\.html/);
+  });
+});
+

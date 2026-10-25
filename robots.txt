@@ -1,0 +1,31 @@
+# Planora AI – Production Robots Policy
+# Canonical Origin: https://planora-ai-india.vercel.app
+
+User-agent: *
+# Allow indexable public marketing pages
+Allow: /$
+Allow: /index.html$
+Allow: /pricing.html$
+Allow: /about.html$
+Allow: /privacy.html$
+Allow: /terms.html$
+Allow: /assets/
+Allow: /favicon.ico
+Allow: /favicon.svg
+
+# Protect private authenticated workspaces & API endpoints
+Disallow: /dashboard.html
+Disallow: /create-event.html
+Disallow: /planner.html
+Disallow: /budget.html
+Disallow: /timeline.html
+Disallow: /tasks.html
+Disallow: /vendors.html
+Disallow: /guests.html
+Disallow: /copilot.html
+Disallow: /reports.html
+Disallow: /settings.html
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://planora-ai-india.vercel.app/sitemap.xml
