@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Event – Planora AI</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="assets/logo/planora-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/workspace.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div class="app-layout" id="app-root">
+    <!-- Injected by JS -->
+  </div>
+
+  <div id="toast-container" role="alert" aria-live="polite"></div>
+
+  <script type="module">
+    import { requireAuth, showAuthLoading, hideAuthLoading } from './js/auth-guard.js';
+    import { getAppShellHTML, getTopbarHTML } from './js/app-shell.js';
+    import { createEvent } from './js/api.js';
+    import { showToast } from './js/utils.js';
+    import { initSidebar } from './js/navigation.js';
+
+    showAuthLoading();
+    const user = await requireAuth();
+    hideAuthLoading();
+
+    const root = document.getElementById('app-root');
+    root.innerHTML = `
+      ${getAppShellHTML('create-event')}
+      <div class="app-main" id="app-main">
+        ${getTopbarHTML('Create Event')}
+        <main class="app-content page-enter">
+          <div style="max-width: 800px; margin: 0 auto;">
+            <div class="workspace-header">
+              <div class="workspace-event-type">✨ New Event Workspace</div>
+              <h1 class="workspace-event-name" style="font-size: var(--text-2xl);">Let's Plan Something Extraordinary</h1>
+              <p style="color: var(--color-text-secondary); margin-top: var(--space-2); font-size: var(--text-sm);">
+                Provide key details about your event. Once created, you can use our AI Event Studio to generate a complete budget, timeline, and vendor plan.
+              </p>
+            </div>
+
+            <div class="card" style="padding: var(--space-8);">
+              <form id="create-event-form" novalidate>
+                <div class="form-group">
+                  <label class="form-label" for="event-name">Event Name <span class="required">*</span></label>
+                  <input type="text" id="event-name" name="name" class="form-input" placeholder="e.g. Suman & Kabir's Wedding Celebration" required maxlength="200">
+                </div>
+
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                  <div class="form-group">
+                    <label class="form-label" for="event-type">Event Type <span class="required">*</span></label>
+                    <select id="event-type" name="event_type" class="form-input form-select" required>
+                      <option value="wedding">💍 Wedding</option>
+                      <option value="birthday">🎂 Birthday Party</option>
+                      <option value="anniversary">🥂 Anniversary</option>
+                      <option value="corporate">💼 Corporate Event / Summit</option>
+                      <option value="engagement">💎 Engagement Party</option>
+                      <option value="baby_shower">👶 Baby Shower</option>
+                      <option value="graduation">🎓 Graduation</option>
+                      <option value="festival">🎉 Festival / Community Gathering</option>
+                      <option value="conference">🎤 Conference</option>
+                      <option value="fundraiser">🤝 Fundraiser / Gala</option>
+                      <option value="other">✨ Other Celebration</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="event-date">Event Date <span class="required">*</span></label>
+                    <input type="date" id="event-date" name="event_date" class="form-input" required>
+                  </div>
+                </div>
+
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                  <div class="form-group">
+                    <label class="form-label" for="guest-count">Expected Guests <span class="required">*</span></label>
+                    <input type="number" id="guest-count" name="guest_count" class="form-input" placeholder="e.g. 150" min="1" max="100000" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="budget">Total Budget <span class="required">*</span></label>
+                    <div style="display: flex; gap: var(--space-2);">
+                      <select id="currency" name="currency" class="form-input form-select" style="width: 100px;">
+                        <option value="INR" selected>INR (₹)</option>
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="AED">AED (د.إ)</option>
+                        <option value="SGD">SGD (S$)</option>
+                      </select>
+                      <input type="number" id="budget" name="budget" class="form-input" placeholder="e.g. 500000" min="0" step="1000" required style="flex: 1;">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="location">Location / Venue City</label>
+                  <input type="text" id="location" name="location" class="form-input" placeholder="e.g. Udaipur, Rajasthan or Taj Palace Hotel" maxlength="300">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="theme">Preferred Theme / Aesthetic</label>
+                  <input type="text" id="theme" name="theme" class="form-input" placeholder="e.g. Royal Rajasthani, Modern Minimalist, Bohemian Sunset" maxlength="200">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="dietary-preferences">Dietary & Food Preferences</label>
+                  <input type="text" id="dietary-preferences" name="dietary_preferences" class="form-input" placeholder="e.g. Pure Vegetarian, Jain counters, North & South Indian live stations" maxlength="500">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="additional-reqs">Additional Notes or Special Requirements</label>
+                  <textarea id="additional-reqs" name="additional_requirements" class="form-input" rows="3" placeholder="e.g. Need space for 50-car parking, sound curfew at 10 PM, traditional welcome ceremony..." maxlength="1000"></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: var(--space-4); margin-top: var(--space-6);">
+                  <a href="dashboard.html" class="btn btn-secondary">Cancel</a>
+                  <button type="submit" class="btn btn-primary" id="btn-submit-event">
+                    <span>Create Event & Launch Studio</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </main>
+      </div>
+    `;
+
+    initSidebar();
+
+    // Set min date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('event-date').min = today;
+    // Default date to 60 days from now
+    const defaultDate = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    document.getElementById('event-date').value = defaultDate;
+
+    const form = document.getElementById('create-event-form');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('event-name').value.trim();
+      const event_type = document.getElementById('event-type').value;
+      const event_date = document.getElementById('event-date').value;
+      const guest_count = parseInt(document.getElementById('guest-count').value, 10);
+      const budget = parseFloat(document.getElementById('budget').value);
+      const currency = document.getElementById('currency').value;
+      const location = document.getElementById('location').value.trim();
+      const theme = document.getElementById('theme').value.trim();
+      const dietary_preferences = document.getElementById('dietary-preferences').value.trim();
+      const additional_requirements = document.getElementById('additional-reqs').value.trim();
+
+      if (!name) {
+        showToast('Please enter an event name', 'error');
+        document.getElementById('event-name').focus();
+        return;
+      }
+      if (!event_date) {
+        showToast('Please choose an event date', 'error');
+        return;
+      }
+      if (isNaN(guest_count) || guest_count < 1) {
+        showToast('Please enter a valid guest count (at least 1)', 'error');
+        return;
+      }
+      if (isNaN(budget) || budget < 0) {
+        showToast('Please enter a valid budget amount', 'error');
+        return;
+      }
+
+      const submitBtn = document.getElementById('btn-submit-event');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="loading-spinner"></span> Creating...';
+
+      const res = await createEvent({
+        name,
+        event_type,
+        event_date,
+        guest_count,
+        budget,
+        currency,
+        location: location || null,
+        theme: theme || null,
+        dietary_preferences: dietary_preferences || null,
+        additional_requirements: additional_requirements || null,
+      });
+
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span>Create Event & Launch Studio</span>';
+
+      if (!res.ok) {
+        showToast(res.error || 'Failed to create event', 'error');
+        return;
+      }
+
+      showToast('Event created successfully! Launching AI Studio...', 'success');
+      // Store active event ID in localStorage so workspace tabs immediately reference it
+      localStorage.setItem('planora_active_event_id', res.data.id);
+      setTimeout(() => {
+        window.location.href = `planner.html?event_id=${res.data.id}`;
+      }, 700);
+    });
+  </script>
+</body>
+</html>

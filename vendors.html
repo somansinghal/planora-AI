@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor Management – Planora AI</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="assets/logo/planora-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/workspace.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div class="app-layout" id="app-root"></div>
+  <div id="toast-container" role="alert" aria-live="polite"></div>
+
+  <!-- Add Vendor Modal -->
+  <div class="modal-backdrop hidden" id="vendor-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal" style="max-width: 540px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Add Vendor</h3>
+        <button class="modal-close" id="btn-close-modal" aria-label="Close dialog">&times;</button>
+      </div>
+      <form id="vendor-form">
+        <input type="hidden" id="v-id" value="">
+        <div class="modal-body">
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+            <div class="form-group">
+              <label class="form-label" for="v-name">Business / Vendor Name <span class="required">*</span></label>
+              <input type="text" id="v-name" class="form-input" placeholder="e.g. Prism Light & Sound" required maxlength="200">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="v-category">Category <span class="required">*</span></label>
+              <input type="text" id="v-category" class="form-input" placeholder="e.g. Photography, Catering, Florist" required maxlength="100">
+            </div>
+          </div>
+
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+            <div class="form-group">
+              <label class="form-label" for="v-contact-name">Contact Person</label>
+              <input type="text" id="v-contact-name" class="form-input" placeholder="e.g. Vikram Singh" maxlength="200">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="v-phone">Phone Number</label>
+              <input type="tel" id="v-phone" class="form-input" placeholder="+91 98765 43210" maxlength="20">
+            </div>
+          </div>
+
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+            <div class="form-group">
+              <label class="form-label" for="v-email">Email Address</label>
+              <input type="email" id="v-email" class="form-input" placeholder="vendor@example.com" maxlength="254">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="v-status">Booking Status</label>
+              <select id="v-status" class="form-input form-select">
+                <option value="not_contacted">Not Contacted</option>
+                <option value="contacted">Contacted</option>
+                <option value="quoted">Quoted / In Review</option>
+                <option value="booked">Confirmed / Booked</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+            <div class="form-group">
+              <label class="form-label" for="v-est-cost">Estimated Quote</label>
+              <input type="number" id="v-est-cost" class="form-input" placeholder="0" min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="v-website">Website URL</label>
+              <input type="text" id="v-website" class="form-input" placeholder="https://..." maxlength="500">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="v-notes">Notes / Special Agreements</label>
+            <textarea id="v-notes" class="form-input" rows="2" placeholder="e.g. Requires 3-phase power, 2 meals for crew..." maxlength="1000"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-vendor">Save Vendor</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { requireAuth, showAuthLoading, hideAuthLoading } from './js/auth-guard.js';
+    import { getAppShellHTML, getTopbarHTML } from './js/app-shell.js';
+    import { getEvents, getEvent, getVendors, createVendor, updateVendor, deleteVendor } from './js/api.js';
+    import { showToast, formatCurrency, escapeHtml, showConfirm } from './js/utils.js';
+    import { initSidebar } from './js/navigation.js';
+
+    showAuthLoading();
+    const user = await requireAuth();
+    hideAuthLoading();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let selectedEventId = urlParams.get('event_id') || localStorage.getItem('planora_active_event_id');
+    let currentEvent = null;
+    let allVendors = [];
+
+    const root = document.getElementById('app-root');
+    root.innerHTML = `
+      ${getAppShellHTML('vendors')}
+      <div class="app-main" id="app-main">
+        ${getTopbarHTML('Vendor Management')}
+        <main class="app-content page-enter">
+          <div class="workspace-header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: var(--space-4);">
+              <div>
+                <div class="workspace-event-type">🤝 Vendor Roster</div>
+                <h1 class="workspace-event-name" style="font-size: var(--text-2xl);" id="page-event-name">Event Vendors</h1>
+                <p style="color: var(--color-text-secondary); margin-top: var(--space-1); font-size: var(--text-sm);">
+                  Manage quotes, track vendor contracts, and keep team points of contact accessible.
+                </p>
+              </div>
+              <div style="display: flex; gap: var(--space-3); align-items: center;">
+                <select id="event-selector" class="form-input form-select" style="padding: var(--space-2) var(--space-3); font-size: var(--text-sm); min-width: 220px;">
+                  <option value="">Loading events...</option>
+                </select>
+                <button class="btn btn-primary btn-sm" id="btn-open-add-vendor">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  <span>Add Vendor</span>
+                </button>
+              </div>
+            </div>
+
+            <nav class="workspace-tabs" style="margin-top: var(--space-6); margin-bottom: 0;">
+              <a href="planner.html" class="workspace-tab" id="tab-studio">✨ AI Studio</a>
+              <a href="budget.html" class="workspace-tab" id="tab-budget">💰 Budget</a>
+              <a href="timeline.html" class="workspace-tab" id="tab-timeline">📅 Timeline</a>
+              <a href="tasks.html" class="workspace-tab" id="tab-tasks">✅ Tasks</a>
+              <a href="vendors.html" class="workspace-tab active" id="tab-vendors">🤝 Vendors</a>
+              <a href="guests.html" class="workspace-tab" id="tab-guests">👥 Guests</a>
+              <a href="copilot.html" class="workspace-tab" id="tab-copilot">🤖 Copilot</a>
+              <a href="reports.html" class="workspace-tab" id="tab-reports">📊 Reports</a>
+            </nav>
+          </div>
+
+          <div id="no-event-view" class="card empty-state hidden" style="padding: var(--space-12); text-align: center;">
+            <div class="empty-icon" style="font-size: 3rem; margin-bottom: var(--space-4);">🤝</div>
+            <h3 style="font-size: var(--text-xl); font-weight: var(--font-semibold); margin-bottom: var(--space-2);">No Event Selected</h3>
+            <p style="color: var(--color-text-secondary); max-width: 440px; margin: 0 auto var(--space-6);">Create an event first to organize vendors.</p>
+            <a href="create-event.html" class="btn btn-primary">Create Event</a>
+          </div>
+
+          <div id="vendors-view" class="hidden">
+            <!-- Stats -->
+            <div class="dashboard-stats" style="margin-bottom: var(--space-6);">
+              <div class="stat-card">
+                <div class="stat-card-title">Total Vendors</div>
+                <div class="stat-card-value" id="stat-vendor-total">0</div>
+                <div class="stat-card-subtext">On checklist</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-card-title">Booked / Confirmed</div>
+                <div class="stat-card-value" id="stat-vendor-booked" style="color: #34D399;">0</div>
+                <div class="stat-card-subtext">Deposits placed</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-card-title">Quoted</div>
+                <div class="stat-card-value" id="stat-vendor-quoted" style="color: #FCD34D;">0</div>
+                <div class="stat-card-subtext">Awaiting decision</div>
+              </div>
+            </div>
+
+            <!-- Vendors Roster Grid -->
+            <div id="vendor-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-6);">
+              <!-- Dynamic cards -->
+            </div>
+          </div>
+        </main>
+      </div>
+    `;
+
+    initSidebar();
+
+    async function loadEvents() {
+      const res = await getEvents();
+      const selector = document.getElementById('event-selector');
+      if (!res.ok || !res.data || !res.data.events || res.data.events.length === 0) {
+        document.getElementById('no-event-view').classList.remove('hidden');
+        document.getElementById('vendors-view').classList.add('hidden');
+        selector.innerHTML = '<option value="">No events found</option>';
+        return;
+      }
+
+      const events = res.data.events;
+      selector.innerHTML = events.map(ev => `
+        <option value="${ev.id}" ${ev.id === selectedEventId ? 'selected' : ''}>
+          ${escapeHtml(ev.name)}
+        </option>
+      `).join('');
+
+      if (!selectedEventId || !events.some(e => e.id === selectedEventId)) {
+        selectedEventId = events[0].id;
+      }
+      localStorage.setItem('planora_active_event_id', selectedEventId);
+
+      document.getElementById('tab-studio').href = `planner.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-budget').href = `budget.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-timeline').href = `timeline.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-tasks').href = `tasks.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-vendors').href = `vendors.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-guests').href = `guests.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-copilot').href = `copilot.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-reports').href = `reports.html?event_id=${selectedEventId}`;
+
+      await refreshVendors();
+    }
+
+    async function refreshVendors() {
+      const evRes = await getEvent(selectedEventId);
+      if (!evRes.ok) return;
+      currentEvent = evRes.data;
+
+      document.getElementById('no-event-view').classList.add('hidden');
+      document.getElementById('vendors-view').classList.remove('hidden');
+      document.getElementById('page-event-name').textContent = `${currentEvent.name} – Vendors`;
+
+      const vRes = await getVendors(selectedEventId);
+      allVendors = vRes.ok ? (vRes.data || []) : [];
+
+      document.getElementById('stat-vendor-total').textContent = allVendors.length;
+      document.getElementById('stat-vendor-booked').textContent = allVendors.filter(v => v.booking_status === 'booked').length;
+      document.getElementById('stat-vendor-quoted').textContent = allVendors.filter(v => v.booking_status === 'quoted').length;
+
+      renderVendorCards();
+    }
+
+    function renderVendorCards() {
+      const container = document.getElementById('vendor-cards-grid');
+      const curr = currentEvent?.currency || 'INR';
+
+      if (allVendors.length === 0) {
+        container.innerHTML = `
+          <div class="card" style="grid-column: 1 / -1; padding: var(--space-8); text-align: center; color: var(--color-text-tertiary); font-size: var(--text-sm);">
+            No vendors registered yet. Add vendors manually or generate a plan in the AI Event Studio.
+          </div>
+        `;
+        return;
+      }
+
+      const statusBadges = {
+        booked: { label: 'Booked', class: 'badge-success' },
+        quoted: { label: 'Quoted', class: 'badge-warning' },
+        contacted: { label: 'Contacted', class: 'badge-info' },
+        not_contacted: { label: 'Not Contacted', class: 'badge-neutral' },
+        cancelled: { label: 'Cancelled', class: 'badge-danger' },
+      };
+
+      container.innerHTML = allVendors.map(v => {
+        const badge = statusBadges[v.booking_status] || statusBadges.not_contacted;
+        return `
+          <div class="card" style="padding: var(--space-5); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-2); margin-bottom: var(--space-2);">
+                <div>
+                  <h4 style="font-size: var(--text-base); font-weight: var(--font-bold); color: var(--color-text-primary);">${escapeHtml(v.name)}</h4>
+                  <span style="font-size: var(--text-xs); color: var(--color-brand-primary); font-weight: var(--font-medium);">${escapeHtml(v.category)}</span>
+                </div>
+                <span class="badge ${badge.class}" style="text-transform: capitalize; font-size: 11px;">${badge.label}</span>
+              </div>
+
+              ${v.estimated_cost ? `<div style="font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-accent); margin-bottom: var(--space-2);">Quote: ${formatCurrency(v.estimated_cost, curr)}</div>` : ''}
+
+              <div style="display: flex; flex-direction: column; gap: 4px; font-size: var(--text-xs); color: var(--color-text-secondary); margin-bottom: var(--space-3);">
+                ${v.contact_name ? `<div>👤 ${escapeHtml(v.contact_name)}</div>` : ''}
+                ${v.contact_phone ? `<div>📞 <a href="tel:${escapeHtml(v.contact_phone)}" style="color: var(--color-text-secondary); text-decoration: underline;">${escapeHtml(v.contact_phone)}</a></div>` : ''}
+                ${v.contact_email ? `<div>✉️ <a href="mailto:${escapeHtml(v.contact_email)}" style="color: var(--color-text-secondary); text-decoration: underline;">${escapeHtml(v.contact_email)}</a></div>` : ''}
+                ${v.website ? `<div>🌐 <a href="${escapeHtml(v.website)}" target="_blank" rel="noopener noreferrer" style="color: var(--color-brand-primary);">Website</a></div>` : ''}
+              </div>
+
+              ${v.notes ? `<p style="font-size: var(--text-xs); color: var(--color-text-tertiary); background: var(--color-bg-surface); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md);">${escapeHtml(v.notes)}</p>` : ''}
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-4); padding-top: var(--space-2); border-top: 1px solid var(--color-border-subtle);">
+              <button class="btn btn-ghost btn-xs btn-edit-v" data-id="${v.id}" title="Edit vendor">✏️ Edit</button>
+              <button class="btn btn-ghost btn-xs btn-del-v" data-id="${v.id}" title="Delete vendor" style="color: var(--color-status-danger);">🗑️ Delete</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.btn-edit-v').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          const v = allVendors.find(x => x.id === id);
+          if (v) openModal(v);
+        });
+      });
+
+      document.querySelectorAll('.btn-del-v').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          const confirmed = await showConfirm({
+            title: 'Delete Vendor',
+            message: 'Are you sure you want to remove this vendor?',
+            confirmText: 'Delete',
+            danger: true,
+          });
+          if (!confirmed) return;
+          const res = await deleteVendor(id);
+          if (res.ok) {
+            allVendors = allVendors.filter(x => x.id !== id);
+            refreshVendors();
+            showToast('Vendor removed', 'success');
+          }
+        });
+      });
+    }
+
+    // Modal
+    function openModal(v = null) {
+      document.getElementById('vendor-form').reset();
+      if (v) {
+        document.getElementById('modal-title').textContent = 'Edit Vendor';
+        document.getElementById('v-id').value = v.id;
+        document.getElementById('v-name').value = v.name;
+        document.getElementById('v-category').value = v.category;
+        document.getElementById('v-contact-name').value = v.contact_name || '';
+        document.getElementById('v-phone').value = v.contact_phone || '';
+        document.getElementById('v-email').value = v.contact_email || '';
+        document.getElementById('v-status').value = v.booking_status || 'not_contacted';
+        document.getElementById('v-est-cost').value = v.estimated_cost || '';
+        document.getElementById('v-website').value = v.website || '';
+        document.getElementById('v-notes').value = v.notes || '';
+      } else {
+        document.getElementById('modal-title').textContent = 'Add Vendor';
+        document.getElementById('v-id').value = '';
+      }
+      document.getElementById('vendor-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('vendor-modal').classList.add('hidden');
+    }
+
+    document.getElementById('btn-open-add-vendor').addEventListener('click', () => openModal());
+    document.getElementById('btn-close-modal').addEventListener('click', closeModal);
+    document.getElementById('btn-cancel-modal').addEventListener('click', closeModal);
+
+    document.getElementById('vendor-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('v-id').value;
+      const name = document.getElementById('v-name').value.trim();
+      const category = document.getElementById('v-category').value.trim();
+      const contact_name = document.getElementById('v-contact-name').value.trim() || null;
+      const contact_phone = document.getElementById('v-phone').value.trim() || null;
+      const contact_email = document.getElementById('v-email').value.trim() || null;
+      const booking_status = document.getElementById('v-status').value;
+      const estVal = document.getElementById('v-est-cost').value;
+      const estimated_cost = estVal ? parseFloat(estVal) : null;
+      const website = document.getElementById('v-website').value.trim() || null;
+      const notes = document.getElementById('v-notes').value.trim() || null;
+
+      if (!name || !category) {
+        showToast('Please enter vendor name and category', 'error');
+        return;
+      }
+
+      const payload = {
+        name,
+        category,
+        contact_name,
+        contact_phone,
+        contact_email,
+        booking_status,
+        estimated_cost,
+        website,
+        notes,
+      };
+
+      let res;
+      if (id) {
+        res = await updateVendor(id, payload);
+      } else {
+        res = await createVendor(selectedEventId, payload);
+      }
+
+      if (res.ok) {
+        showToast(id ? 'Vendor updated' : 'Vendor registered', 'success');
+        closeModal();
+        refreshVendors();
+      } else {
+        showToast(res.error || 'Failed to save vendor', 'error');
+      }
+    });
+
+    document.getElementById('event-selector').addEventListener('change', (e) => {
+      selectedEventId = e.target.value;
+      localStorage.setItem('planora_active_event_id', selectedEventId);
+      refreshVendors();
+    });
+
+    loadEvents();
+  </script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us – Planora AI</title>
+  <meta name="description" content="Learn about Planora AI's mission to transform event planning through intelligent AI agents, disciplined budgeting, and seamless coordination.">
+  <meta name="robots" content="index, follow">
+  <link rel="icon" type="image/png" href="assets/logo/planora-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/landing.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <nav class="nav-public" id="main-nav" aria-label="Main navigation">
+    <div class="nav-container container">
+      <a href="index.html" class="nav-logo" aria-label="Planora AI Home">
+        <img src="assets/logo/planora-logo.png" alt="Planora AI Logo" width="36" height="36">
+        <span class="nav-logo-text">Planora AI</span>
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="index.html#features" class="nav-link">Features</a></li>
+        <li><a href="index.html#how-it-works" class="nav-link">How It Works</a></li>
+        <li><a href="pricing.html" class="nav-link">Pricing</a></li>
+        <li><a href="about.html" class="nav-link active">About</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-ghost btn-sm">Sign In</a>
+        <a href="signup.html" class="btn btn-primary btn-sm">Get Started Free</a>
+      </div>
+      <button class="nav-hamburger" id="hamburger-btn" aria-label="Toggle mobile menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <main style="padding-top: calc(var(--nav-height) + var(--space-12)); padding-bottom: var(--space-20);">
+    <div class="container" style="max-width: 860px;">
+      <div style="text-align: center; margin-bottom: var(--space-16);">
+        <span class="badge badge-brand" style="margin-bottom: var(--space-3);">Our Mission</span>
+        <h1 style="font-size: clamp(2rem, 4vw, 3rem); font-weight: var(--font-black); line-height: 1.15; margin-bottom: var(--space-4);">
+          From Idea to <span class="gradient-text">Flawlessly Planned</span>
+        </h1>
+        <p style="color: var(--color-text-secondary); font-size: var(--text-lg); line-height: 1.6;">
+          We believe celebrating life's milestones shouldn't come with crippling stress, runaway budgets, or chaotic spreadsheets.
+        </p>
+      </div>
+
+      <div class="card" style="padding: var(--space-8); margin-bottom: var(--space-8); line-height: 1.7; font-size: var(--text-base); color: var(--color-text-secondary);">
+        <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--color-text-primary); margin-bottom: var(--space-4);">Why We Built Planora AI</h2>
+        <p style="margin-bottom: var(--space-4);">
+          Whether it is an Indian wedding spanning multiple days with hundreds of guests, a golden jubilee anniversary, or a corporate product launch, organizing events today requires juggling dozen of disparate apps: notes apps, spreadsheets, messy WhatsApp threads, and unverified vendor listings.
+        </p>
+        <p style="margin-bottom: var(--space-4);">
+          Planora AI was created to provide a unified, intelligent event operating system. We combine bleeding-edge AI generation with deterministic, persistent SaaS workspaces: itemized financial tracking, T-minus milestone schedules, vendor contract trackers, and guest RSVP management.
+        </p>
+        <p>
+          We do not believe in fake AI fluff. Every budget allocation is mathematically validated, every suggestion is editable, and your private guest lists and financial figures remain strictly yours.
+        </p>
+      </div>
+
+      <!-- Core Principles Grid -->
+      <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); text-align: center; margin-bottom: var(--space-8); color: var(--color-text-primary);">
+        Our Architectural Principles
+      </h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: var(--space-6); margin-bottom: var(--space-16);">
+        <div class="card" style="padding: var(--space-6);">
+          <div style="font-size: 2rem; margin-bottom: var(--space-3);">🛡️</div>
+          <h3 style="font-size: var(--text-lg); font-weight: var(--font-bold); color: var(--color-text-primary); margin-bottom: var(--space-2);">Privacy & Authorization First</h3>
+          <p style="font-size: var(--text-sm); color: var(--color-text-secondary); line-height: 1.6;">
+            Every backend endpoint enforces cryptographic Firebase token verification and strict user-ownership checks. We never leak one host's guest list or budget to another.
+          </p>
+        </div>
+
+        <div class="card" style="padding: var(--space-6);">
+          <div style="font-size: 2rem; margin-bottom: var(--space-3);">🧠</div>
+          <h3 style="font-size: var(--text-lg); font-weight: var(--font-bold); color: var(--color-text-primary); margin-bottom: var(--space-2);">Disciplined AI Architecture</h3>
+          <p style="font-size: var(--text-sm); color: var(--color-text-secondary); line-height: 1.6;">
+            AI is a co-pilot, not a black box. Generated plans use strict Pydantic schemas, server-side budget sum normalization, and explicit disclaimers regarding market vendor rates.
+          </p>
+        </div>
+
+        <div class="card" style="padding: var(--space-6);">
+          <div style="font-size: 2rem; margin-bottom: var(--space-3);">⚡</div>
+          <h3 style="font-size: var(--text-lg); font-weight: var(--font-bold); color: var(--color-text-primary); margin-bottom: var(--space-2);">Ultra-Fast & Lightweight</h3>
+          <p style="font-size: var(--text-sm); color: var(--color-text-secondary); line-height: 1.6;">
+            Zero bloated JavaScript frameworks. Built on clean modern vanilla web standards, high-performance FastAPI asynchronous Python, and instant Groq LLM inference.
+          </p>
+        </div>
+
+        <div class="card" style="padding: var(--space-6);">
+          <div style="font-size: 2rem; margin-bottom: var(--space-3);">🇮🇳</div>
+          <h3 style="font-size: var(--text-lg); font-weight: var(--font-bold); color: var(--color-text-primary); margin-bottom: var(--space-2);">Culturally Grounded</h3>
+          <p style="font-size: var(--text-sm); color: var(--color-text-secondary); line-height: 1.6;">
+            Built with deep appreciation for regional celebrations, multi-day wedding rituals (Mehendi, Sangeet, Reception), diverse dietary requirements (Jain, Halal, Vegan), and INR defaults.
+          </p>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="card" style="padding: var(--space-10); text-align: center; background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(6,182,212,0.1)); border-color: rgba(124,58,237,0.3);">
+        <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold); margin-bottom: var(--space-3); color: var(--color-text-primary);">Ready to plan your next milestone?</h2>
+        <p style="color: var(--color-text-secondary); margin-bottom: var(--space-6); max-width: 500px; margin-left: auto; margin-right: auto;">
+          Join thousands of event organizers creating unforgettable celebrations with Planora AI.
+        </p>
+        <a href="signup.html" class="btn btn-primary btn-lg">Get Started Free Today</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer" style="padding: var(--space-12) 0; border-top: 1px solid var(--color-border-subtle); background: var(--color-bg-surface);">
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-4);">
+      <div style="display: flex; align-items: center; gap: var(--space-3);">
+        <img src="assets/logo/planora-logo.png" alt="Planora AI" width="28" height="28">
+        <span style="font-weight: var(--font-bold); color: var(--color-text-primary);">Planora AI</span>
+      </div>
+      <div style="display: flex; gap: var(--space-6); font-size: var(--text-sm); color: var(--color-text-secondary);">
+        <a href="about.html">About</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+      </div>
+      <p style="font-size: var(--text-xs); color: var(--color-text-tertiary);">© 2026 Planora AI. From idea to flawlessly planned.</p>
+    </div>
+  </footer>
+</body>
+</html>

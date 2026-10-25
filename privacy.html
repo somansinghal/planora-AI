@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy – Planora AI</title>
+  <meta name="description" content="Planora AI Privacy Policy detailing data handling, user authorization, and storage practices.">
+  <meta name="robots" content="index, follow">
+  <link rel="icon" type="image/png" href="assets/logo/planora-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/landing.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <nav class="nav-public" id="main-nav" aria-label="Main navigation">
+    <div class="nav-container container">
+      <a href="index.html" class="nav-logo" aria-label="Planora AI Home">
+        <img src="assets/logo/planora-logo.png" alt="Planora AI Logo" width="36" height="36">
+        <span class="nav-logo-text">Planora AI</span>
+      </a>
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-ghost btn-sm">Sign In</a>
+        <a href="signup.html" class="btn btn-primary btn-sm">Get Started Free</a>
+      </div>
+    </div>
+  </nav>
+
+  <main style="padding-top: calc(var(--nav-height) + var(--space-12)); padding-bottom: var(--space-20);">
+    <div class="container" style="max-width: 800px;">
+      <h1 style="font-size: var(--text-3xl); font-weight: var(--font-black); margin-bottom: var(--space-2);">Privacy Policy</h1>
+      <p style="color: var(--color-text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-8);">
+        Last updated: October 2026 • <em>Notice: Specific corporate registration details below are to be verified and finalized by the project owner prior to commercial rollout.</em>
+      </p>
+
+      <div class="card" style="padding: var(--space-8); line-height: 1.7; color: var(--color-text-secondary); display: flex; flex-direction: column; gap: var(--space-6); font-size: var(--text-sm);">
+        <section>
+          <h2 style="color: var(--color-text-primary); font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-2);">1. Introduction & Ownership</h2>
+          <p>
+            Planora AI ("we", "us", or "our") operates the event management platform accessible at planora.ai. We are committed to protecting the privacy, security, and integrity of your personal information and event data.
+          </p>
+          <p>
+            <strong>Entity Information:</strong> [Legal Entity Name: Planora AI / To be supplied by Project Owner, Operating Address: To be supplied by Project Owner, Contact: privacy@planora.ai].
+          </p>
+        </section>
+
+        <section>
+          <h2 style="color: var(--color-text-primary); font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-2);">2. Information We Collect</h2>
+          <p>We collect only the information necessary to provide our event planning SaaS:</p>
+          <ul style="padding-left: var(--space-5); list-style: disc; margin-top: var(--space-2);">
+            <li><strong>Account Information:</strong> Email address, display name, and authentication tokens provided via Firebase Authentication.</li>
+            <li><strong>Event Data:</strong> Event names, dates, budgets, guest counts, dietary notes, task items, vendor quotes, and itemized expenses.</li>
+            <li><strong>AI Prompt Context:</strong> Text inputs provided to the AI Event Studio and Copilot to generate relevant event recommendations.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 style="color: var(--color-text-primary); font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-2);">3. How We Use and Protect Your Data</h2>
+          <p>
+            Your event data is protected by server-side authorization controls and Firestore Security Rules. Every document is bound to your authenticated Firebase UID. We never sell, rent, or share your guest lists, contact details, or financial numbers with advertisers or unrelated third parties.
+          </p>
+        </section>
+
+        <section>
+          <h2 style="color: var(--color-text-primary); font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-2);">4. Third-Party Service Providers</h2>
+          <p>We rely on carefully audited infrastructure providers to operate the application:</p>
+          <ul style="padding-left: var(--space-5); list-style: disc; margin-top: var(--space-2);">
+            <li><strong>Google Firebase:</strong> Managed authentication and Cloud Firestore database storage.</li>
+            <li><strong>Groq Inc.:</strong> Inference provider for large language models used during AI plan generation. We do not permit AI providers to use your private event prompts for model retraining.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 style="color: var(--color-text-primary); font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-2);">5. Data Retention & Deletion Rights</h2>
+          <p>
+            You retain 100% ownership of your data. When you delete an event or account within Planora AI, the associated expenses, tasks, vendors, and guest rosters are permanently purged from active collections.
+          </p>
+        </section>
+
+        <section>
+          <h2 style="color: var(--color-text-primary); font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-2);">6. Contact Us</h2>
+          <p>
+            If you have questions or requests regarding your personal data, please contact our team at <strong>privacy@planora.ai</strong>.
+          </p>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer" style="padding: var(--space-12) 0; border-top: 1px solid var(--color-border-subtle); background: var(--color-bg-surface);">
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-4);">
+      <div style="display: flex; align-items: center; gap: var(--space-3);">
+        <img src="assets/logo/planora-logo.png" alt="Planora AI" width="28" height="28">
+        <span style="font-weight: var(--font-bold); color: var(--color-text-primary);">Planora AI</span>
+      </div>
+      <div style="display: flex; gap: var(--space-6); font-size: var(--text-sm); color: var(--color-text-secondary);">
+        <a href="about.html">About</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+      </div>
+      <p style="font-size: var(--text-xs); color: var(--color-text-tertiary);">© 2026 Planora AI. From idea to flawlessly planned.</p>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timeline & Schedule – Planora AI</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="assets/logo/planora-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/workspace.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div class="app-layout" id="app-root"></div>
+  <div id="toast-container" role="alert" aria-live="polite"></div>
+
+  <script type="module">
+    import { requireAuth, showAuthLoading, hideAuthLoading } from './js/auth-guard.js';
+    import { getAppShellHTML, getTopbarHTML } from './js/app-shell.js';
+    import { getEvents, getEvent, getEventPlans, getTasks } from './js/api.js';
+    import { showToast, formatDate, daysUntil, escapeHtml } from './js/utils.js';
+    import { initSidebar } from './js/navigation.js';
+
+    showAuthLoading();
+    const user = await requireAuth();
+    hideAuthLoading();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let selectedEventId = urlParams.get('event_id') || localStorage.getItem('planora_active_event_id');
+    let currentEvent = null;
+
+    const root = document.getElementById('app-root');
+    root.innerHTML = `
+      ${getAppShellHTML('timeline')}
+      <div class="app-main" id="app-main">
+        ${getTopbarHTML('Timeline & Schedule')}
+        <main class="app-content page-enter">
+          <div class="workspace-header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: var(--space-4);">
+              <div>
+                <div class="workspace-event-type">📅 Time Operations</div>
+                <h1 class="workspace-event-name" style="font-size: var(--text-2xl);" id="page-event-name">Event Timeline</h1>
+                <p style="color: var(--color-text-secondary); margin-top: var(--space-1); font-size: var(--text-sm);">
+                  Track countdown milestones, preparation dead-lines, and hour-by-hour event day schedules.
+                </p>
+              </div>
+              <div style="display: flex; gap: var(--space-3); align-items: center;">
+                <select id="event-selector" class="form-input form-select" style="padding: var(--space-2) var(--space-3); font-size: var(--text-sm); min-width: 220px;">
+                  <option value="">Loading events...</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Workspace Tabs -->
+            <nav class="workspace-tabs" style="margin-top: var(--space-6); margin-bottom: 0;">
+              <a href="planner.html" class="workspace-tab" id="tab-studio">✨ AI Studio</a>
+              <a href="budget.html" class="workspace-tab" id="tab-budget">💰 Budget</a>
+              <a href="timeline.html" class="workspace-tab active" id="tab-timeline">📅 Timeline</a>
+              <a href="tasks.html" class="workspace-tab" id="tab-tasks">✅ Tasks</a>
+              <a href="vendors.html" class="workspace-tab" id="tab-vendors">🤝 Vendors</a>
+              <a href="guests.html" class="workspace-tab" id="tab-guests">👥 Guests</a>
+              <a href="copilot.html" class="workspace-tab" id="tab-copilot">🤖 Copilot</a>
+              <a href="reports.html" class="workspace-tab" id="tab-reports">📊 Reports</a>
+            </nav>
+          </div>
+
+          <!-- Empty state if no event exists -->
+          <div id="no-event-view" class="card empty-state hidden" style="padding: var(--space-12); text-align: center;">
+            <div class="empty-icon" style="font-size: 3rem; margin-bottom: var(--space-4);">⏳</div>
+            <h3 style="font-size: var(--text-xl); font-weight: var(--font-semibold); margin-bottom: var(--space-2);">No Event Selected</h3>
+            <p style="color: var(--color-text-secondary); max-width: 440px; margin: 0 auto var(--space-6);">Create an event first to manage timelines and countdowns.</p>
+            <a href="create-event.html" class="btn btn-primary">Create Event</a>
+          </div>
+
+          <!-- Timeline Content View -->
+          <div id="timeline-view" class="hidden">
+            <!-- Event Countdown Banner -->
+            <div class="card" style="padding: var(--space-6); margin-bottom: var(--space-6); background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(236,72,153,0.08)); border: 1px solid rgba(124,58,237,0.25); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4);">
+              <div>
+                <span style="font-size: var(--text-xs); color: var(--color-text-tertiary); text-transform: uppercase; font-weight: var(--font-bold); letter-spacing: 0.05em;">Target Date</span>
+                <h3 id="target-date-display" style="font-size: var(--text-xl); font-weight: var(--font-bold); color: var(--color-text-primary); margin-top: 2px;">-</h3>
+              </div>
+              <div style="display: flex; align-items: baseline; gap: var(--space-2);">
+                <span id="countdown-days" style="font-size: var(--text-3xl); font-weight: var(--font-black); color: var(--color-brand-primary);">0</span>
+                <span style="font-size: var(--text-sm); color: var(--color-text-secondary); font-weight: var(--font-medium);">Days Remaining</span>
+              </div>
+            </div>
+
+            <!-- Two-column: Preparation Roadmap vs Event-Day Schedule -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: var(--space-6);">
+              <!-- Preparation Roadmap -->
+              <div class="card" style="padding: var(--space-6);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
+                  <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold);">Preparation Roadmap</h3>
+                  <span class="badge badge-info">Milestones</span>
+                </div>
+                <div id="milestones-container" style="display: flex; flex-direction: column; gap: var(--space-4);">
+                  <!-- Dynamic milestones -->
+                </div>
+              </div>
+
+              <!-- Event-Day Schedule Run-Sheet -->
+              <div class="card" style="padding: var(--space-6);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
+                  <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold);">Event-Day Run Sheet</h3>
+                  <span class="badge badge-brand">Hourly Agenda</span>
+                </div>
+                <div id="schedule-container" style="display: flex; flex-direction: column; gap: var(--space-3);">
+                  <!-- Dynamic schedule -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    `;
+
+    initSidebar();
+
+    async function loadEvents() {
+      const res = await getEvents();
+      const selector = document.getElementById('event-selector');
+      if (!res.ok || !res.data || !res.data.events || res.data.events.length === 0) {
+        document.getElementById('no-event-view').classList.remove('hidden');
+        document.getElementById('timeline-view').classList.add('hidden');
+        selector.innerHTML = '<option value="">No events found</option>';
+        return;
+      }
+
+      const events = res.data.events;
+      selector.innerHTML = events.map(ev => `
+        <option value="${ev.id}" ${ev.id === selectedEventId ? 'selected' : ''}>
+          ${escapeHtml(ev.name)}
+        </option>
+      `).join('');
+
+      if (!selectedEventId || !events.some(e => e.id === selectedEventId)) {
+        selectedEventId = events[0].id;
+      }
+      localStorage.setItem('planora_active_event_id', selectedEventId);
+
+      // Update workspace tabs
+      document.getElementById('tab-studio').href = `planner.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-budget').href = `budget.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-timeline').href = `timeline.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-tasks').href = `tasks.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-vendors').href = `vendors.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-guests').href = `guests.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-copilot').href = `copilot.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-reports').href = `reports.html?event_id=${selectedEventId}`;
+
+      await refreshTimeline();
+    }
+
+    async function refreshTimeline() {
+      const evRes = await getEvent(selectedEventId);
+      if (!evRes.ok) return;
+      currentEvent = evRes.data;
+
+      document.getElementById('no-event-view').classList.add('hidden');
+      document.getElementById('timeline-view').classList.remove('hidden');
+      document.getElementById('page-event-name').textContent = `${currentEvent.name} – Timeline`;
+
+      const days = daysUntil(currentEvent.event_date);
+      document.getElementById('target-date-display').textContent = formatDate(currentEvent.event_date);
+      document.getElementById('countdown-days').textContent = Math.max(0, days);
+
+      // Fetch AI plan to display milestones and event-day schedule
+      const plansRes = await getEventPlans(selectedEventId);
+      const plan = (plansRes.ok && plansRes.data && plansRes.data.length > 0) ? plansRes.data[0] : null;
+
+      renderMilestones(plan ? plan.timeline_milestones : []);
+      renderSchedule(plan ? plan.event_day_schedule : []);
+    }
+
+    function renderMilestones(milestones) {
+      const container = document.getElementById('milestones-container');
+      if (!milestones || milestones.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: var(--space-8); color: var(--color-text-tertiary); font-size: var(--text-sm);">
+            No timeline milestones generated yet.<br>
+            <a href="planner.html?event_id=${selectedEventId}" class="btn btn-secondary btn-sm" style="margin-top: var(--space-4);">
+              Generate Milestones in AI Studio
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = milestones.map(m => `
+        <div style="display: flex; gap: var(--space-4); align-items: flex-start; background: var(--color-bg-surface); padding: var(--space-4); border-radius: var(--radius-xl); border-left: 3px solid var(--color-brand-primary);">
+          <div style="text-align: center; min-width: 60px;">
+            <span class="badge badge-brand" style="font-size: var(--text-xs); font-family: monospace;">T -${m.days_before}d</span>
+          </div>
+          <div style="flex: 1;">
+            <strong style="color: var(--color-text-primary); font-size: var(--text-sm); display: block;">${escapeHtml(m.title)}</strong>
+            ${m.description ? `<p style="font-size: var(--text-xs); color: var(--color-text-secondary); margin-top: 4px;">${escapeHtml(m.description)}</p>` : ''}
+          </div>
+          <span class="badge ${m.priority === 'high' ? 'badge-danger' : 'badge-neutral'}" style="font-size: 10px; text-transform: uppercase;">
+            ${escapeHtml(m.priority || 'normal')}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    function renderSchedule(schedule) {
+      const container = document.getElementById('schedule-container');
+      if (!schedule || schedule.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: var(--space-8); color: var(--color-text-tertiary); font-size: var(--text-sm);">
+            No event-day schedule generated yet.<br>
+            <a href="planner.html?event_id=${selectedEventId}" class="btn btn-secondary btn-sm" style="margin-top: var(--space-4);">
+              Generate Schedule in AI Studio
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = schedule.map(s => `
+        <div style="display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-3); background: var(--color-bg-surface); border-radius: var(--radius-lg);">
+          <span class="badge badge-success" style="white-space: nowrap; font-family: monospace; font-size: var(--text-xs);">${escapeHtml(s.time)}</span>
+          <div style="font-size: var(--text-sm); flex: 1;">
+            <div style="font-weight: var(--font-semibold); color: var(--color-text-primary);">${escapeHtml(s.activity)}</div>
+            ${s.notes ? `<div style="font-size: var(--text-xs); color: var(--color-text-secondary); margin-top: 2px;">${escapeHtml(s.notes)}</div>` : ''}
+          </div>
+          ${s.duration_minutes ? `<span style="font-size: var(--text-xs); color: var(--color-text-tertiary);">${s.duration_minutes}m</span>` : ''}
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('event-selector').addEventListener('change', (e) => {
+      selectedEventId = e.target.value;
+      localStorage.setItem('planora_active_event_id', selectedEventId);
+      refreshTimeline();
+    });
+
+    loadEvents();
+  </script>
+</body>
+</html>

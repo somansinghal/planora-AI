@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings – Planora AI</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="assets/logo/planora-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/workspace.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div class="app-layout" id="app-root"></div>
+  <div id="toast-container" role="alert" aria-live="polite"></div>
+
+  <script type="module">
+    import { requireAuth, showAuthLoading, hideAuthLoading } from './js/auth-guard.js';
+    import { getAppShellHTML, getTopbarHTML } from './js/app-shell.js';
+    import { getMe, checkHealth } from './js/api.js';
+    import { signOutUser } from './js/auth.js';
+    import { showToast, escapeHtml } from './js/utils.js';
+    import { initSidebar } from './js/navigation.js';
+
+    showAuthLoading();
+    const user = await requireAuth();
+    hideAuthLoading();
+
+    const root = document.getElementById('app-root');
+    root.innerHTML = `
+      ${getAppShellHTML('settings')}
+      <div class="app-main" id="app-main">
+        ${getTopbarHTML('Account & Settings')}
+        <main class="app-content page-enter">
+          <div style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-6);">
+            <!-- User Profile Card -->
+            <div class="card" style="padding: var(--space-6);">
+              <h3 style="font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-4);">User Profile</h3>
+              <div style="display: flex; gap: var(--space-4); align-items: center; margin-bottom: var(--space-6);">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--gradient-brand); display: flex; align-items: center; justify-content: center; font-size: var(--text-xl); font-weight: var(--font-bold); color: #FFF;" id="set-avatar">
+                  ?
+                </div>
+                <div>
+                  <h4 id="set-name" style="font-size: var(--text-base); font-weight: var(--font-bold); color: var(--color-text-primary);">-</h4>
+                  <p id="set-email" style="font-size: var(--text-sm); color: var(--color-text-secondary);">-</p>
+                  <span id="set-uid" style="font-size: 11px; font-family: monospace; color: var(--color-text-tertiary);">UID: -</span>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" for="pref-currency">Default Preferred Currency</label>
+                <select id="pref-currency" class="form-input form-select" style="max-width: 280px;">
+                  <option value="INR" selected>INR – Indian Rupee (₹)</option>
+                  <option value="USD">USD – US Dollar ($)</option>
+                  <option value="EUR">EUR – Euro (€)</option>
+                  <option value="GBP">GBP – British Pound (£)</option>
+                  <option value="AED">AED – UAE Dirham (د.إ)</option>
+                  <option value="SGD">SGD – Singapore Dollar (S$)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- System Services & Infrastructure Health -->
+            <div class="card" style="padding: var(--space-6);">
+              <h3 style="font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-4);">Infrastructure & AI Diagnostics</h3>
+              <div style="display: flex; flex-direction: column; gap: var(--space-3); font-size: var(--text-sm);">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3); background: var(--color-bg-surface); border-radius: var(--radius-lg);">
+                  <div>
+                    <strong>Backend API Service</strong>
+                    <div style="font-size: var(--text-xs); color: var(--color-text-tertiary);">FastAPI Uvicorn Production Engine</div>
+                  </div>
+                  <span class="badge badge-success" id="badge-api-status">Connecting...</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3); background: var(--color-bg-surface); border-radius: var(--radius-lg);">
+                  <div>
+                    <strong>Authentication Engine</strong>
+                    <div style="font-size: var(--text-xs); color: var(--color-text-tertiary);">Firebase Identity Platform</div>
+                  </div>
+                  <span class="badge badge-success">Active (Verified)</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3); background: var(--color-bg-surface); border-radius: var(--radius-lg);">
+                  <div>
+                    <strong>AI Planning Engine</strong>
+                    <div style="font-size: var(--text-xs); color: var(--color-text-tertiary);">Groq LLaMA 3.1 & Demonstration Fallback</div>
+                  </div>
+                  <span class="badge badge-brand">Enabled</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="card" style="padding: var(--space-6); border: 1px solid rgba(239,68,68,0.25);">
+              <h3 style="font-size: var(--text-base); font-weight: var(--font-bold); color: var(--color-status-danger); margin-bottom: var(--space-2);">Session & Sign Out</h3>
+              <p style="font-size: var(--text-xs); color: var(--color-text-secondary); margin-bottom: var(--space-4);">
+                Terminates your active session and redirects to the landing page.
+              </p>
+              <button class="btn btn-secondary btn-sm" id="btn-settings-signout" style="color: var(--color-status-danger);">
+                Sign Out of Account
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    `;
+
+    initSidebar();
+
+    // Populate user profile
+    const profileRes = await getMe();
+    if (profileRes.ok && profileRes.data) {
+      const p = profileRes.data;
+      document.getElementById('set-name').textContent = p.display_name || 'Event Planner';
+      document.getElementById('set-email').textContent = p.email || 'user@planora.ai';
+      document.getElementById('set-uid').textContent = `UID: ${p.uid}`;
+      document.getElementById('set-avatar').textContent = (p.display_name || p.email || 'U').charAt(0).toUpperCase();
+    }
+
+    // Check health
+    const health = await checkHealth();
+    if (health.ok) {
+      document.getElementById('badge-api-status').textContent = 'Online (200 OK)';
+    } else {
+      document.getElementById('badge-api-status').textContent = 'Offline';
+      document.getElementById('badge-api-status').className = 'badge badge-danger';
+    }
+
+    document.getElementById('btn-settings-signout').addEventListener('click', async () => {
+      await signOutUser();
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

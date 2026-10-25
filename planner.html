@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Event Studio – Planora AI</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="assets/logo/planora-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/workspace.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div class="app-layout" id="app-root"></div>
+  <div id="toast-container" role="alert" aria-live="polite"></div>
+
+  <script type="module">
+    import { requireAuth, showAuthLoading, hideAuthLoading } from './js/auth-guard.js';
+    import { getAppShellHTML, getTopbarHTML } from './js/app-shell.js';
+    import { getEvents, getEvent, generateEventPlan, acceptAndSavePlan, getEventPlans } from './js/api.js';
+    import { showToast, formatCurrency, formatDate, escapeHtml } from './js/utils.js';
+    import { initSidebar } from './js/navigation.js';
+
+    showAuthLoading();
+    const user = await requireAuth();
+    hideAuthLoading();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let selectedEventId = urlParams.get('event_id') || localStorage.getItem('planora_active_event_id');
+    let currentEvent = null;
+    let currentPlan = null;
+
+    const root = document.getElementById('app-root');
+    root.innerHTML = `
+      ${getAppShellHTML('planner')}
+      <div class="app-main" id="app-main">
+        ${getTopbarHTML('AI Event Studio')}
+        <main class="app-content page-enter">
+          <div class="workspace-header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: var(--space-4);">
+              <div>
+                <div class="workspace-event-type">✨ Planora Intelligent Engine</div>
+                <h1 class="workspace-event-name" style="font-size: var(--text-2xl);">AI Event Studio</h1>
+                <p style="color: var(--color-text-secondary); margin-top: var(--space-1); font-size: var(--text-sm);">
+                  Generate tailored end-to-end budgets, production run-sheets, vendor checklists, and preparation roadmaps.
+                </p>
+              </div>
+              <div style="min-width: 240px;">
+                <label for="event-selector" style="font-size: var(--text-xs); color: var(--color-text-tertiary); display: block; margin-bottom: 4px; text-transform: uppercase; font-weight: var(--font-semibold);">Select Event</label>
+                <select id="event-selector" class="form-input form-select" style="padding: var(--space-2) var(--space-3); font-size: var(--text-sm);">
+                  <option value="">Loading events...</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty state if no event exists -->
+          <div id="no-event-view" class="card empty-state hidden" style="padding: var(--space-12); text-align: center;">
+            <div class="empty-icon" style="font-size: 3rem; margin-bottom: var(--space-4);">🎪</div>
+            <h3 style="font-size: var(--text-xl); font-weight: var(--font-semibold); margin-bottom: var(--space-2);">No Event Selected</h3>
+            <p style="color: var(--color-text-secondary); max-width: 440px; margin: 0 auto var(--space-6);">
+              You need an active event before generating an AI plan. Create your first celebration in seconds.
+            </p>
+            <a href="create-event.html" class="btn btn-primary">Create Event</a>
+          </div>
+
+          <!-- Studio Workspace -->
+          <div id="studio-view" class="hidden">
+            <!-- Event Summary Badge Bar -->
+            <div class="card" id="event-context-bar" style="padding: var(--space-4) var(--space-6); margin-bottom: var(--space-6); display: flex; flex-wrap: wrap; gap: var(--space-6); align-items: center; justify-content: space-between; border-left: 4px solid var(--color-brand-primary);">
+              <div style="display: flex; gap: var(--space-6); flex-wrap: wrap;">
+                <div>
+                  <span style="font-size: var(--text-xs); color: var(--color-text-tertiary); display: block;">Event</span>
+                  <strong id="ctx-name" style="color: var(--color-text-primary); font-size: var(--text-base);">-</strong>
+                </div>
+                <div>
+                  <span style="font-size: var(--text-xs); color: var(--color-text-tertiary); display: block;">Target Date</span>
+                  <span id="ctx-date" style="color: var(--color-text-secondary); font-size: var(--text-sm);">-</span>
+                </div>
+                <div>
+                  <span style="font-size: var(--text-xs); color: var(--color-text-tertiary); display: block;">Guest Count</span>
+                  <span id="ctx-guests" style="color: var(--color-text-secondary); font-size: var(--text-sm);">-</span>
+                </div>
+                <div>
+                  <span style="font-size: var(--text-xs); color: var(--color-text-tertiary); display: block;">Budget Target</span>
+                  <span id="ctx-budget" style="color: var(--color-brand-primary); font-weight: var(--font-semibold); font-size: var(--text-sm);">-</span>
+                </div>
+              </div>
+              <div style="display: flex; gap: var(--space-2);">
+                <a href="budget.html" class="btn btn-ghost btn-sm" id="lnk-view-budget">View Budget</a>
+                <a href="timeline.html" class="btn btn-ghost btn-sm" id="lnk-view-timeline">View Timeline</a>
+              </div>
+            </div>
+
+            <!-- Generator Controls Card -->
+            <div class="card" style="padding: var(--space-6); margin-bottom: var(--space-6);">
+              <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); margin-bottom: var(--space-4); display: flex; align-items: center; gap: var(--space-2);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-brand-primary);"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z"/></svg>
+                AI Plan Customization
+              </h3>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-4);">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label class="form-label" for="plan-theme-pref">Aesthetic / Theme Direction</label>
+                  <input type="text" id="plan-theme-pref" class="form-input" placeholder="e.g. Royal Regal, Pastel Bloom, Neon Retro">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label class="form-label" for="plan-priority-pref">Budget Priority Focus</label>
+                  <select id="plan-priority-pref" class="form-input form-select">
+                    <option value="balanced" selected>Balanced across all categories</option>
+                    <option value="venue_food">Heavy on Venue & Gourmet Dining</option>
+                    <option value="entertainment_decor">Heavy on Decor, Lighting & DJ</option>
+                    <option value="photo_memories">Heavy on Cinematic Photo & Video</option>
+                    <option value="budget_friendly">Maximum Cost-Saving & Value</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="plan-extra-pref">Specific Requirements or Venue Quirks</label>
+                <input type="text" id="plan-extra-pref" class="form-input" placeholder="e.g. Sunset cocktail hour, vegan dessert table, indoor-outdoor flow">
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-4); padding-top: var(--space-2); border-top: 1px solid var(--color-border-subtle);">
+                <div style="display: flex; gap: var(--space-4); flex-wrap: wrap; font-size: var(--text-sm); color: var(--color-text-secondary);">
+                  <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="checkbox" id="chk-vendors" checked> Include Vendors
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="checkbox" id="chk-timeline" checked> Include Timeline
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="checkbox" id="chk-tasks" checked> Include Tasks
+                  </label>
+                </div>
+
+                <button class="btn btn-primary" id="btn-generate-plan">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z"/></svg>
+                  <span>Generate Master Plan</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Generated Plan Result Section -->
+            <div id="plan-result-container" class="hidden">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-3);">
+                <div style="display: flex; align-items: center; gap: var(--space-2);">
+                  <h2 style="font-size: var(--text-xl); font-weight: var(--font-bold); color: var(--color-text-primary);">Generated Master Plan</h2>
+                  <span class="badge badge-success" id="badge-provider">Validated Plan</span>
+                </div>
+                <div style="display: flex; gap: var(--space-3);">
+                  <button class="btn btn-secondary btn-sm" id="btn-re-generate">Regenerate</button>
+                  <button class="btn btn-primary btn-sm" id="btn-apply-plan">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Apply to Workspace</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Disclaimer Banner -->
+              <div id="plan-disclaimer-box" class="card" style="padding: var(--space-3) var(--space-4); margin-bottom: var(--space-6); background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.25); font-size: var(--text-xs); color: #93C5FD; display: flex; align-items: center; gap: var(--space-2);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span id="txt-disclaimer">Estimates generated by AI model. Always verify vendor pricing and local availability directly.</span>
+              </div>
+
+              <!-- Executive Summary Card -->
+              <div class="card" style="padding: var(--space-6); margin-bottom: var(--space-6);">
+                <h3 style="font-size: var(--text-base); font-weight: var(--font-semibold); margin-bottom: var(--space-2); color: var(--color-text-tertiary); text-transform: uppercase; font-size: var(--text-xs); letter-spacing: 0.05em;">Executive Summary</h3>
+                <p id="plan-summary-text" style="font-size: var(--text-base); line-height: 1.6; color: var(--color-text-primary); margin-bottom: var(--space-4);"></p>
+                
+                <h4 style="font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-secondary); margin-bottom: var(--space-2);">Theme Concepts</h4>
+                <div id="plan-themes-list" style="display: flex; flex-direction: column; gap: var(--space-2);"></div>
+              </div>
+
+              <!-- Grid: Budget Breakdown & Schedule -->
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: var(--space-6); margin-bottom: var(--space-6);">
+                <!-- Budget Breakdown -->
+                <div class="card" style="padding: var(--space-6);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
+                    <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold);">Budget Allocation</h3>
+                    <span id="plan-total-budget" style="font-size: var(--text-sm); font-weight: var(--font-bold); color: var(--color-brand-primary);">-</span>
+                  </div>
+                  <div id="plan-budget-items" style="display: flex; flex-direction: column; gap: var(--space-3);"></div>
+                </div>
+
+                <!-- Event Day Schedule -->
+                <div class="card" style="padding: var(--space-6);">
+                  <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); margin-bottom: var(--space-4);">Event-Day Run Sheet</h3>
+                  <div id="plan-schedule-items" style="display: flex; flex-direction: column; gap: var(--space-3);"></div>
+                </div>
+              </div>
+
+              <!-- Grid: Vendors & Timeline -->
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: var(--space-6); margin-bottom: var(--space-6);">
+                <!-- Vendor Checklist -->
+                <div class="card" style="padding: var(--space-6);">
+                  <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); margin-bottom: var(--space-4);">Recommended Vendors</h3>
+                  <div id="plan-vendor-items" style="display: flex; flex-direction: column; gap: var(--space-3);"></div>
+                </div>
+
+                <!-- Preparation Timeline Milestones -->
+                <div class="card" style="padding: var(--space-6);">
+                  <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); margin-bottom: var(--space-4);">Preparation Milestones</h3>
+                  <div id="plan-milestone-items" style="display: flex; flex-direction: column; gap: var(--space-3);"></div>
+                </div>
+              </div>
+
+              <!-- Recommendations & Cost Savings -->
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: var(--space-6);">
+                <div class="card" style="padding: var(--space-6);">
+                  <h3 style="font-size: var(--text-base); font-weight: var(--font-semibold); color: #34D399; margin-bottom: var(--space-3); display: flex; align-items: center; gap: var(--space-2);">
+                    💡 Cost-Saving Ideas
+                  </h3>
+                  <ul id="plan-savings-list" style="padding-left: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); font-size: var(--text-sm); color: var(--color-text-secondary);"></ul>
+                </div>
+                <div class="card" style="padding: var(--space-6);">
+                  <h3 style="font-size: var(--text-base); font-weight: var(--font-semibold); color: #A78BFA; margin-bottom: var(--space-3); display: flex; align-items: center; gap: var(--space-2);">
+                    🎯 Personalized Pro-Tips
+                  </h3>
+                  <ul id="plan-tips-list" style="padding-left: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); font-size: var(--text-sm); color: var(--color-text-secondary);"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    `;
+
+    initSidebar();
+
+    // ── Load Events for Dropdown ─────────────────────────────
+    async function loadEvents() {
+      const res = await getEvents();
+      const selector = document.getElementById('event-selector');
+      if (!res.ok || !res.data || !res.data.events || res.data.events.length === 0) {
+        document.getElementById('no-event-view').classList.remove('hidden');
+        document.getElementById('studio-view').classList.add('hidden');
+        selector.innerHTML = '<option value="">No events found</option>';
+        return;
+      }
+
+      const events = res.data.events;
+      selector.innerHTML = events.map(ev => `
+        <option value="${ev.id}" ${ev.id === selectedEventId ? 'selected' : ''}>
+          ${escapeHtml(ev.name)} (${formatDate(ev.event_date)})
+        </option>
+      `).join('');
+
+      if (!selectedEventId || !events.some(e => e.id === selectedEventId)) {
+        selectedEventId = events[0].id;
+      }
+      localStorage.setItem('planora_active_event_id', selectedEventId);
+
+      await switchEvent(selectedEventId);
+    }
+
+    async function switchEvent(eventId) {
+      selectedEventId = eventId;
+      localStorage.setItem('planora_active_event_id', eventId);
+      
+      const res = await getEvent(eventId);
+      if (!res.ok) {
+        showToast('Failed to load event details', 'error');
+        return;
+      }
+
+      currentEvent = res.data;
+      document.getElementById('no-event-view').classList.add('hidden');
+      document.getElementById('studio-view').classList.remove('hidden');
+
+      // Update context bar
+      document.getElementById('ctx-name').textContent = currentEvent.name;
+      document.getElementById('ctx-date').textContent = formatDate(currentEvent.event_date);
+      document.getElementById('ctx-guests').textContent = `${currentEvent.guest_count} Guests`;
+      document.getElementById('ctx-budget').textContent = formatCurrency(currentEvent.budget, currentEvent.currency);
+
+      document.getElementById('lnk-view-budget').href = `budget.html?event_id=${eventId}`;
+      document.getElementById('lnk-view-timeline').href = `timeline.html?event_id=${eventId}`;
+
+      // Check for previously saved plan
+      const plansRes = await getEventPlans(eventId);
+      if (plansRes.ok && plansRes.data && plansRes.data.length > 0) {
+        renderPlan(plansRes.data[0]);
+      }
+    }
+
+    document.getElementById('event-selector').addEventListener('change', (e) => {
+      switchEvent(e.target.value);
+    });
+
+    // ── Generate Plan ────────────────────────────────────────
+    async function triggerPlanGeneration() {
+      if (!selectedEventId) return;
+
+      const theme = document.getElementById('plan-theme-pref').value.trim();
+      const priority = document.getElementById('plan-priority-pref').value;
+      const extra = document.getElementById('plan-extra-pref').value.trim();
+      const incVendors = document.getElementById('chk-vendors').checked;
+      const incTimeline = document.getElementById('chk-timeline').checked;
+      const incTasks = document.getElementById('chk-tasks').checked;
+
+      const btn = document.getElementById('btn-generate-plan');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner"></span> Generating AI Plan...';
+
+      const payload = {
+        preferred_themes: theme || null,
+        budget_priority: priority,
+        additional_preferences: extra || null,
+        include_vendor_suggestions: incVendors,
+        include_timeline: incTimeline,
+        include_task_list: incTasks,
+      };
+
+      const res = await generateEventPlan(selectedEventId, payload);
+      btn.disabled = false;
+      btn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z"/></svg>
+        <span>Generate Master Plan</span>
+      `;
+
+      if (!res.ok) {
+        showToast(res.error || 'Failed to generate plan', 'error');
+        return;
+      }
+
+      showToast('Master Plan generated successfully!', 'success');
+      renderPlan(res.data);
+    }
+
+    document.getElementById('btn-generate-plan').addEventListener('click', triggerPlanGeneration);
+    document.getElementById('btn-re-generate').addEventListener('click', triggerPlanGeneration);
+
+    // ── Render Generated Plan ────────────────────────────────
+    function renderPlan(plan) {
+      currentPlan = plan;
+      document.getElementById('plan-result-container').classList.remove('hidden');
+
+      document.getElementById('plan-summary-text').textContent = plan.event_summary || '';
+      document.getElementById('txt-disclaimer').textContent = plan.disclaimer || 'Costs are estimates only. Verify vendor pricing directly.';
+      document.getElementById('badge-provider').textContent = (plan.ai_provider === 'demonstration_mode') ? 'Demonstration Mode' : `AI: ${plan.ai_model || 'Groq'}`;
+
+      // Theme Ideas
+      const themeContainer = document.getElementById('plan-themes-list');
+      themeContainer.innerHTML = (plan.theme_ideas || []).map(t => `
+        <div style="background: var(--color-bg-surface); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); border-left: 3px solid var(--color-brand-secondary); font-size: var(--text-sm);">
+          ${escapeHtml(t)}
+        </div>
+      `).join('');
+
+      // Budget Breakdown
+      const budgetItems = document.getElementById('plan-budget-items');
+      document.getElementById('plan-total-budget').textContent = formatCurrency(currentEvent.budget, currentEvent.currency);
+      budgetItems.innerHTML = (plan.budget_breakdown || []).map(item => `
+        <div style="background: var(--color-bg-surface); padding: var(--space-3); border-radius: var(--radius-lg);">
+          <div style="display: flex; justify-content: space-between; font-size: var(--text-sm); margin-bottom: 4px;">
+            <span style="font-weight: var(--font-medium); text-transform: capitalize;">${escapeHtml(item.category)}</span>
+            <span style="color: var(--color-text-accent); font-weight: var(--font-semibold);">${formatCurrency(item.estimated_amount, currentEvent.currency)} (${item.percentage}%)</span>
+          </div>
+          <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; margin-bottom: 4px;">
+            <div style="width: ${item.percentage}%; height: 100%; background: var(--gradient-brand);"></div>
+          </div>
+          ${item.notes ? `<div style="font-size: var(--text-xs); color: var(--color-text-tertiary);">${escapeHtml(item.notes)}</div>` : ''}
+        </div>
+      `).join('');
+
+      // Day-of Schedule
+      const schedContainer = document.getElementById('plan-schedule-items');
+      schedContainer.innerHTML = (plan.event_day_schedule || []).map(s => `
+        <div style="display: flex; gap: var(--space-3); align-items: flex-start; padding-bottom: var(--space-2); border-bottom: 1px solid var(--color-border-subtle);">
+          <span class="badge badge-brand" style="white-space: nowrap; font-family: monospace;">${escapeHtml(s.time)}</span>
+          <div style="font-size: var(--text-sm);">
+            <strong>${escapeHtml(s.activity)}</strong>
+            ${s.notes ? `<p style="font-size: var(--text-xs); color: var(--color-text-secondary); margin-top: 2px;">${escapeHtml(s.notes)}</p>` : ''}
+          </div>
+        </div>
+      `).join('');
+
+      // Vendor Checklist
+      const vendorContainer = document.getElementById('plan-vendor-items');
+      vendorContainer.innerHTML = (plan.vendor_checklist || []).map(v => `
+        <div style="background: var(--color-bg-surface); padding: var(--space-3); border-radius: var(--radius-lg); font-size: var(--text-sm);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <strong style="color: var(--color-text-primary);">${escapeHtml(v.category)}</strong>
+            <span style="font-size: var(--text-xs); color: var(--color-brand-primary);">Est. ${formatCurrency(v.estimated_cost_max, currentEvent.currency)}</span>
+          </div>
+          <p style="font-size: var(--text-xs); color: var(--color-text-secondary); margin-bottom: 4px;">${escapeHtml(v.description)}</p>
+          ${v.tips ? `<div style="font-size: 11px; color: var(--color-text-tertiary); font-style: italic;">💡 ${escapeHtml(v.tips)}</div>` : ''}
+        </div>
+      `).join('');
+
+      // Milestones
+      const milestoneContainer = document.getElementById('plan-milestone-items');
+      milestoneContainer.innerHTML = (plan.timeline_milestones || []).map(m => `
+        <div style="display: flex; gap: var(--space-3); align-items: center; background: var(--color-bg-surface); padding: var(--space-3); border-radius: var(--radius-lg);">
+          <span class="badge badge-info" style="font-size: var(--text-xs);">T -${m.days_before}d</span>
+          <div style="font-size: var(--text-sm); flex: 1;">
+            <div style="font-weight: var(--font-medium);">${escapeHtml(m.title)}</div>
+            ${m.description ? `<div style="font-size: var(--text-xs); color: var(--color-text-tertiary);">${escapeHtml(m.description)}</div>` : ''}
+          </div>
+        </div>
+      `).join('');
+
+      // Savings & Tips
+      document.getElementById('plan-savings-list').innerHTML = (plan.cost_saving_suggestions || []).map(s => `<li>${escapeHtml(s)}</li>`).join('');
+      document.getElementById('plan-tips-list').innerHTML = (plan.personalized_recommendations || []).map(t => `<li>${escapeHtml(t)}</li>`).join('');
+
+      // Scroll to results smoothly
+      document.getElementById('plan-result-container').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // ── Apply Plan to Workspace ──────────────────────────────
+    document.getElementById('btn-apply-plan').addEventListener('click', async () => {
+      if (!selectedEventId || !currentPlan) return;
+
+      const btn = document.getElementById('btn-apply-plan');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner"></span> Applying to Workspace...';
+
+      const res = await acceptAndSavePlan(selectedEventId, currentPlan, true);
+      btn.disabled = false;
+      btn.innerHTML = '<span>Apply to Workspace</span>';
+
+      if (!res.ok) {
+        showToast(res.error || 'Failed to apply plan', 'error');
+        return;
+      }
+
+      showToast('Master Plan applied! Budget, tasks, and vendors populated.', 'success');
+      setTimeout(() => {
+        window.location.href = `budget.html?event_id=${selectedEventId}`;
+      }, 800);
+    });
+
+    loadEvents();
+  </script>
+</body>
+</html>

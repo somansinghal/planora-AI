@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports & Exports – Planora AI</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="assets/logo/planora-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/workspace.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <style>
+    @media print {
+      .sidebar, .topbar, .workspace-tabs, .no-print, #event-selector-container {
+        display: none !important;
+      }
+      .app-main, .app-content {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      body {
+        background: #FFFFFF !important;
+        color: #000000 !important;
+      }
+      .card {
+        border: 1px solid #CCCCCC !important;
+        background: #FFFFFF !important;
+        color: #000000 !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout" id="app-root"></div>
+  <div id="toast-container" role="alert" aria-live="polite"></div>
+
+  <script type="module">
+    import { requireAuth, showAuthLoading, hideAuthLoading } from './js/auth-guard.js';
+    import { getAppShellHTML, getTopbarHTML } from './js/app-shell.js';
+    import { getEvents, getEvent, getEventReport, getExportUrl } from './js/api.js';
+    import { showToast, formatCurrency, formatDate, escapeHtml } from './js/utils.js';
+    import { initSidebar } from './js/navigation.js';
+
+    showAuthLoading();
+    const user = await requireAuth();
+    hideAuthLoading();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let selectedEventId = urlParams.get('event_id') || localStorage.getItem('planora_active_event_id');
+    let reportData = null;
+
+    const root = document.getElementById('app-root');
+    root.innerHTML = `
+      ${getAppShellHTML('reports')}
+      <div class="app-main" id="app-main">
+        ${getTopbarHTML('Reports & Exports')}
+        <main class="app-content page-enter">
+          <div class="workspace-header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: var(--space-4);">
+              <div>
+                <div class="workspace-event-type">📊 Executive Intelligence</div>
+                <h1 class="workspace-event-name" style="font-size: var(--text-2xl);" id="page-event-name">Event Master Report</h1>
+                <p style="color: var(--color-text-secondary); margin-top: var(--space-1); font-size: var(--text-sm);">
+                  Export production schedules, financial audits, and guest lists in CSV, JSON, and print-ready PDF formats.
+                </p>
+              </div>
+              <div style="display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap;" id="event-selector-container">
+                <select id="event-selector" class="form-input form-select" style="padding: var(--space-2) var(--space-3); font-size: var(--text-sm); min-width: 220px;">
+                  <option value="">Loading events...</option>
+                </select>
+                <button class="btn btn-primary btn-sm no-print" onclick="window.print()">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                  <span>Print / PDF</span>
+                </button>
+              </div>
+            </div>
+
+            <nav class="workspace-tabs no-print" style="margin-top: var(--space-6); margin-bottom: 0;">
+              <a href="planner.html" class="workspace-tab" id="tab-studio">✨ AI Studio</a>
+              <a href="budget.html" class="workspace-tab" id="tab-budget">💰 Budget</a>
+              <a href="timeline.html" class="workspace-tab" id="tab-timeline">📅 Timeline</a>
+              <a href="tasks.html" class="workspace-tab" id="tab-tasks">✅ Tasks</a>
+              <a href="vendors.html" class="workspace-tab" id="tab-vendors">🤝 Vendors</a>
+              <a href="guests.html" class="workspace-tab" id="tab-guests">👥 Guests</a>
+              <a href="copilot.html" class="workspace-tab" id="tab-copilot">🤖 Copilot</a>
+              <a href="reports.html" class="workspace-tab active" id="tab-reports">📊 Reports</a>
+            </nav>
+          </div>
+
+          <div id="no-event-view" class="card empty-state hidden" style="padding: var(--space-12); text-align: center;">
+            <div class="empty-icon" style="font-size: 3rem; margin-bottom: var(--space-4);">📊</div>
+            <h3 style="font-size: var(--text-xl); font-weight: var(--font-semibold); margin-bottom: var(--space-2);">No Event Selected</h3>
+            <p style="color: var(--color-text-secondary); max-width: 440px; margin: 0 auto var(--space-6);">Create an event first to generate executive reports.</p>
+            <a href="create-event.html" class="btn btn-primary">Create Event</a>
+          </div>
+
+          <div id="reports-view" class="hidden">
+            <!-- Export Hub Buttons -->
+            <div class="card no-print" style="padding: var(--space-5); margin-bottom: var(--space-6); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-4); background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(6,182,212,0.05));">
+              <div>
+                <strong style="color: var(--color-text-primary); font-size: var(--text-base); display: block;">Instant Data Exports</strong>
+                <span style="font-size: var(--text-xs); color: var(--color-text-secondary);">Direct download files for spreadsheets, caterers, and production crews</span>
+              </div>
+              <div style="display: flex; gap: var(--space-2); flex-wrap: wrap;">
+                <a id="exp-budget-csv" class="btn btn-secondary btn-sm" target="_blank" download>
+                  📥 Budget CSV
+                </a>
+                <a id="exp-guests-csv" class="btn btn-secondary btn-sm" target="_blank" download>
+                  📥 Guest List CSV
+                </a>
+                <a id="exp-tasks-csv" class="btn btn-secondary btn-sm" target="_blank" download>
+                  📥 Tasks CSV
+                </a>
+                <button class="btn btn-secondary btn-sm" id="btn-download-json">
+                  📥 JSON Master File
+                </button>
+              </div>
+            </div>
+
+            <!-- Master Summary Cards Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: var(--space-6); margin-bottom: var(--space-6);">
+              <!-- Event Dossier -->
+              <div class="card" style="padding: var(--space-6);">
+                <h3 style="font-size: var(--text-base); font-weight: var(--font-bold); margin-bottom: var(--space-3); color: var(--color-brand-primary);">1. Event Dossier</h3>
+                <div style="display: flex; flex-direction: column; gap: var(--space-2); font-size: var(--text-sm);">
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Type:</span> <strong id="rep-type" style="text-transform: capitalize;">-</strong></div>
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Target Date:</span> <strong id="rep-date">-</strong></div>
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Location:</span> <span id="rep-location">-</span></div>
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Planned Guests:</span> <span id="rep-guests">-</span></div>
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Theme Direction:</span> <span id="rep-theme">-</span></div>
+                </div>
+              </div>
+
+              <!-- Financial Performance -->
+              <div class="card" style="padding: var(--space-6);">
+                <h3 style="font-size: var(--text-base); font-weight: var(--font-bold); margin-bottom: var(--space-3); color: #34D399;">2. Financial Audit</h3>
+                <div style="display: flex; flex-direction: column; gap: var(--space-2); font-size: var(--text-sm);">
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Target Budget:</span> <strong id="rep-tot-budget">-</strong></div>
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Estimated Spend:</span> <span id="rep-est-spend">-</span></div>
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Actual / Paid:</span> <strong id="rep-act-spend" style="color: #34D399;">-</strong></div>
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Remaining Balance:</span> <strong id="rep-rem-budget">-</strong></div>
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Budget Utilization:</span> <span id="rep-utilization">-</span></div>
+                </div>
+              </div>
+
+              <!-- Execution & Task Readiness -->
+              <div class="card" style="padding: var(--space-6);">
+                <h3 style="font-size: var(--text-base); font-weight: var(--font-bold); margin-bottom: var(--space-3); color: #FCD34D;">3. Task Readiness</h3>
+                <div style="display: flex; flex-direction: column; gap: var(--space-2); font-size: var(--text-sm);">
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Total Checklist Items:</span> <strong id="rep-task-total">-</strong></div>
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Completed Tasks:</span> <strong id="rep-task-done" style="color: #34D399;">-</strong></div>
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">In Progress:</span> <span id="rep-task-prog">-</span></div>
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Pending To-Do:</span> <span id="rep-task-todo">-</span></div>
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Completion Velocity:</span> <strong id="rep-task-pct">-</strong></div>
+                </div>
+              </div>
+
+              <!-- Vendor & Guest Operations -->
+              <div class="card" style="padding: var(--space-6);">
+                <h3 style="font-size: var(--text-base); font-weight: var(--font-bold); margin-bottom: var(--space-3); color: #22D3EE;">4. Vendors & Attendance</h3>
+                <div style="display: flex; flex-direction: column; gap: var(--space-2); font-size: var(--text-sm);">
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Total Vendors Tracked:</span> <span id="rep-v-total">-</span></div>
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Vendors Booked:</span> <strong id="rep-v-booked" style="color: #34D399;">-</strong></div>
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Total Invitations:</span> <span id="rep-g-total">-</span></div>
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Confirmed Attendees:</span> <strong id="rep-g-conf" style="color: #34D399;">-</strong></div>
+                  <div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-secondary);">Pending RSVPs:</span> <span id="rep-g-pend">-</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Latest AI Plan Snapshot if Available -->
+            <div id="ai-plan-snapshot-card" class="card hidden" style="padding: var(--space-6); margin-bottom: var(--space-6);">
+              <h3 style="font-size: var(--text-lg); font-weight: var(--font-bold); margin-bottom: var(--space-3); color: var(--color-text-primary);">AI Master Blueprint Snapshot</h3>
+              <p id="rep-plan-summary" style="font-size: var(--text-sm); line-height: 1.6; color: var(--color-text-secondary); margin-bottom: var(--space-4);"></p>
+            </div>
+          </div>
+        </main>
+      </div>
+    `;
+
+    initSidebar();
+
+    async function loadEvents() {
+      const res = await getEvents();
+      const selector = document.getElementById('event-selector');
+      if (!res.ok || !res.data || !res.data.events || res.data.events.length === 0) {
+        document.getElementById('no-event-view').classList.remove('hidden');
+        document.getElementById('reports-view').classList.add('hidden');
+        selector.innerHTML = '<option value="">No events found</option>';
+        return;
+      }
+
+      const events = res.data.events;
+      selector.innerHTML = events.map(ev => `
+        <option value="${ev.id}" ${ev.id === selectedEventId ? 'selected' : ''}>
+          ${escapeHtml(ev.name)}
+        </option>
+      `).join('');
+
+      if (!selectedEventId || !events.some(e => e.id === selectedEventId)) {
+        selectedEventId = events[0].id;
+      }
+      localStorage.setItem('planora_active_event_id', selectedEventId);
+
+      document.getElementById('tab-studio').href = `planner.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-budget').href = `budget.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-timeline').href = `timeline.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-tasks').href = `tasks.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-vendors').href = `vendors.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-guests').href = `guests.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-copilot').href = `copilot.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-reports').href = `reports.html?event_id=${selectedEventId}`;
+
+      await refreshReport();
+    }
+
+    async function refreshReport() {
+      const res = await getEventReport(selectedEventId);
+      if (!res.ok) {
+        showToast('Failed to load event report', 'error');
+        return;
+      }
+
+      reportData = res.data;
+      const ev = reportData.event;
+      const b = reportData.budget_overview;
+      const t = reportData.tasks_overview;
+      const v = reportData.vendors_overview;
+      const g = reportData.guests_overview;
+
+      document.getElementById('no-event-view').classList.add('hidden');
+      document.getElementById('reports-view').classList.remove('hidden');
+      document.getElementById('page-event-name').textContent = `${ev.name} – Master Report`;
+
+      // Setup export buttons
+      document.getElementById('exp-budget-csv').href = getExportUrl(selectedEventId, 'expenses');
+      document.getElementById('exp-guests-csv').href = getExportUrl(selectedEventId, 'guests');
+      document.getElementById('exp-tasks-csv').href = getExportUrl(selectedEventId, 'tasks');
+
+      // Dossier
+      document.getElementById('rep-type').textContent = ev.event_type;
+      document.getElementById('rep-date').textContent = formatDate(ev.event_date);
+      document.getElementById('rep-location').textContent = ev.location || 'Not specified';
+      document.getElementById('rep-guests').textContent = `${ev.guest_count} guests`;
+      document.getElementById('rep-theme').textContent = ev.theme || 'Standard';
+
+      // Financials
+      const curr = b.currency || 'INR';
+      document.getElementById('rep-tot-budget').textContent = formatCurrency(b.total_budget, curr);
+      document.getElementById('rep-est-spend').textContent = formatCurrency(b.total_estimated, curr);
+      document.getElementById('rep-act-spend').textContent = formatCurrency(b.total_actual, curr);
+      document.getElementById('rep-rem-budget').textContent = formatCurrency(b.remaining, curr);
+      document.getElementById('rep-utilization').textContent = `${b.utilization_pct}%`;
+
+      // Tasks
+      document.getElementById('rep-task-total').textContent = t.total_tasks;
+      document.getElementById('rep-task-done').textContent = t.completed;
+      document.getElementById('rep-task-prog').textContent = t.in_progress;
+      document.getElementById('rep-task-todo').textContent = t.todo;
+      document.getElementById('rep-task-pct').textContent = `${t.progress_pct}% complete`;
+
+      // Vendors & Guests
+      document.getElementById('rep-v-total').textContent = v.total_vendors;
+      document.getElementById('rep-v-booked').textContent = v.booked_count;
+      document.getElementById('rep-g-total').textContent = g.total_invited;
+      document.getElementById('rep-g-conf').textContent = g.confirmed;
+      document.getElementById('rep-g-pend').textContent = g.pending;
+
+      // Plan snapshot
+      if (reportData.latest_plan) {
+        document.getElementById('ai-plan-snapshot-card').classList.remove('hidden');
+        document.getElementById('rep-plan-summary').textContent = reportData.latest_plan.event_summary || '';
+      }
+    }
+
+    document.getElementById('btn-download-json').addEventListener('click', () => {
+      if (!reportData) return;
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(reportData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `${reportData.event.name.replace(/\s+/g, '_')}_master_report.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast('Master JSON report downloaded', 'success');
+    });
+
+    document.getElementById('event-selector').addEventListener('change', (e) => {
+      selectedEventId = e.target.value;
+      localStorage.setItem('planora_active_event_id', selectedEventId);
+      refreshReport();
+    });
+
+    loadEvents();
+  </script>
+</body>
+</html>

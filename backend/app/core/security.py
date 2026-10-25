@@ -50,7 +50,11 @@ def _get_firebase_auth():
         return _firebase_auth
 
     except Exception as exc:
-        logger.error(f"Firebase Admin initialization failed: {exc}")
+        from app.core.config import settings
+        if settings.ENVIRONMENT == "production":
+            logger.error(f"Firebase Admin initialization failed: {exc}")
+        else:
+            logger.debug(f"Firebase Admin not configured in dev mode: {exc}")
         return None
 
 

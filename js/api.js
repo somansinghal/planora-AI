@@ -234,9 +234,21 @@ export async function chatWithCopilot(eventId, message, history = []) {
   );
 }
 
-// ── Reports endpoint ──────────────────────────────────────────
-export async function getEventReport(eventId, format = 'json') {
-  return api.get(`/api/events/${eventId}/report?format=${format}`);
+export async function acceptAndSavePlan(eventId, planData, applyToWorkspace = true) {
+  return api.post(`/api/events/${eventId}/plans?apply_to_workspace=${applyToWorkspace}`, planData);
+}
+
+export async function getBudgetSummary(eventId) {
+  return api.get(`/api/events/${eventId}/budget-summary`);
+}
+
+export async function getGuestSummary(eventId) {
+  return api.get(`/api/events/${eventId}/guests/summary`);
+}
+
+export function getExportUrl(eventId, exportType = 'expenses') {
+  return `${API_BASE_URL}/api/events/${eventId}/export/csv?export_type=${exportType}`;
 }
 
 export default api;
+

@@ -1,0 +1,26 @@
+{
+  "name": "planora-ai",
+  "version": "1.0.0",
+  "description": "Planora AI – AI-powered event-planning and event-management SaaS",
+  "scripts": {
+    "dev:backend": "cd backend && python3 -m uvicorn app.main:app --reload --port 8000",
+    "dev:frontend": "python3 -m http.server 3000",
+    "test:api": "cd backend && python3 -m unittest discover -s tests -p 'test_*.py' -v",
+    "test:browser": "playwright test",
+    "capture:screenshots": "node tests/playwright/capture-screenshots.js",
+    "record:video": "node tests/playwright/record-demo-video.js"
+  },
+  "keywords": [
+    "event-planning",
+    "ai-planner",
+    "saas",
+    "fastapi",
+    "firebase",
+    "groq"
+  ],
+  "author": "Planora AI Contributors",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}

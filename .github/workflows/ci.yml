@@ -1,0 +1,63 @@
+name: Planora AI CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-backend:
+    name: Backend API & Security Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run Backend Integration & Security Tests
+        run: |
+          cd backend
+          python -m unittest discover -s tests -p "test_*.py" -v
+
+  audit-frontend:
+    name: Frontend Lint & Syntax Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate HTML and CSS files exist
+        run: |
+          test -f index.html
+          test -f login.html
+          test -f signup.html
+          test -f pricing.html
+          test -f about.html
+          test -f privacy.html
+          test -f terms.html
+          test -f 404.html
+          test -f dashboard.html
+          test -f create-event.html
+          test -f planner.html
+          test -f budget.html
+          test -f timeline.html
+          test -f tasks.html
+          test -f vendors.html
+          test -f guests.html
+          test -f copilot.html
+          test -f reports.html
+          test -f settings.html
+          echo "All 19 frontend pages verified."

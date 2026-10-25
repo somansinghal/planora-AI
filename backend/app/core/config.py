@@ -27,7 +27,7 @@ class Settings:
 
     # ── Firebase Admin ────────────────────────────────────────
     # NEVER expose these in frontend code
-    FIREBASE_PROJECT_ID: str = os.getenv("FIREBASE_PROJECT_ID", "")
+    FIREBASE_PROJECT_ID: str = os.getenv("FIREBASE_PROJECT_ID", "planora-ai")
     FIREBASE_ADMIN_CREDENTIALS: str = os.getenv("FIREBASE_ADMIN_CREDENTIALS_PATH", "")
 
     # ── AI Provider ───────────────────────────────────────────

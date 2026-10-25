@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Event Copilot – Planora AI</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="assets/logo/planora-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/workspace.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div class="app-layout" id="app-root"></div>
+  <div id="toast-container" role="alert" aria-live="polite"></div>
+
+  <script type="module">
+    import { requireAuth, showAuthLoading, hideAuthLoading } from './js/auth-guard.js';
+    import { getAppShellHTML, getTopbarHTML } from './js/app-shell.js';
+    import { getEvents, getEvent, chatWithCopilot } from './js/api.js';
+    import { showToast, escapeHtml } from './js/utils.js';
+    import { initSidebar } from './js/navigation.js';
+
+    showAuthLoading();
+    const user = await requireAuth();
+    hideAuthLoading();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let selectedEventId = urlParams.get('event_id') || localStorage.getItem('planora_active_event_id');
+    let currentEvent = null;
+    let messageHistory = [];
+
+    const root = document.getElementById('app-root');
+    root.innerHTML = `
+      ${getAppShellHTML('copilot')}
+      <div class="app-main" id="app-main">
+        ${getTopbarHTML('AI Event Copilot')}
+        <main class="app-content page-enter">
+          <div class="workspace-header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: var(--space-4);">
+              <div>
+                <div class="workspace-event-type">🤖 Intelligent Co-Planner</div>
+                <h1 class="workspace-event-name" style="font-size: var(--text-2xl);" id="page-event-name">AI Event Copilot</h1>
+                <p style="color: var(--color-text-secondary); margin-top: var(--space-1); font-size: var(--text-sm);">
+                  Ask questions, trim budgets, brainstorm themes, and discover blind spots grounded in your live event data.
+                </p>
+              </div>
+              <div style="display: flex; gap: var(--space-3); align-items: center;">
+                <select id="event-selector" class="form-input form-select" style="padding: var(--space-2) var(--space-3); font-size: var(--text-sm); min-width: 220px;">
+                  <option value="">Loading events...</option>
+                </select>
+              </div>
+            </div>
+
+            <nav class="workspace-tabs" style="margin-top: var(--space-6); margin-bottom: 0;">
+              <a href="planner.html" class="workspace-tab" id="tab-studio">✨ AI Studio</a>
+              <a href="budget.html" class="workspace-tab" id="tab-budget">💰 Budget</a>
+              <a href="timeline.html" class="workspace-tab" id="tab-timeline">📅 Timeline</a>
+              <a href="tasks.html" class="workspace-tab" id="tab-tasks">✅ Tasks</a>
+              <a href="vendors.html" class="workspace-tab" id="tab-vendors">🤝 Vendors</a>
+              <a href="guests.html" class="workspace-tab" id="tab-guests">👥 Guests</a>
+              <a href="copilot.html" class="workspace-tab active" id="tab-copilot">🤖 Copilot</a>
+              <a href="reports.html" class="workspace-tab" id="tab-reports">📊 Reports</a>
+            </nav>
+          </div>
+
+          <div id="no-event-view" class="card empty-state hidden" style="padding: var(--space-12); text-align: center;">
+            <div class="empty-icon" style="font-size: 3rem; margin-bottom: var(--space-4);">🤖</div>
+            <h3 style="font-size: var(--text-xl); font-weight: var(--font-semibold); margin-bottom: var(--space-2);">No Event Selected</h3>
+            <p style="color: var(--color-text-secondary); max-width: 440px; margin: 0 auto var(--space-6);">Create an event first to consult with AI Copilot.</p>
+            <a href="create-event.html" class="btn btn-primary">Create Event</a>
+          </div>
+
+          <div id="copilot-view" class="hidden">
+            <!-- Chat Container Card -->
+            <div class="card" style="display: flex; flex-direction: column; height: calc(100vh - 340px); min-height: 480px; padding: 0; overflow: hidden;">
+              <!-- Chat Stream Messages -->
+              <div id="chat-stream" style="flex: 1; overflow-y: auto; padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-4);">
+                <!-- Injected messages -->
+              </div>
+
+              <!-- Suggested Prompts / Chips -->
+              <div id="quick-chips-container" style="padding: var(--space-2) var(--space-6); background: var(--color-bg-surface); border-top: 1px solid var(--color-border-subtle); display: flex; gap: var(--space-2); overflow-x: auto;">
+                <button class="chip-btn" data-query="How can I cut 10% from my budget?">💡 Cut 10% budget</button>
+                <button class="chip-btn" data-query="What tasks should I prioritize 30 days before?">📅 30-day checklist</button>
+                <button class="chip-btn" data-query="Suggest vegetarian and Jain live food counters">🥗 Catering ideas</button>
+                <button class="chip-btn" data-query="What planning blindspots might I have missed?">🔍 Find planning gaps</button>
+              </div>
+
+              <!-- Chat Input Bar -->
+              <form id="chat-form" style="padding: var(--space-4) var(--space-6); background: var(--color-bg-card); border-top: 1px solid var(--color-border-subtle); display: flex; gap: var(--space-3); align-items: center;">
+                <input type="text" id="chat-input" class="form-input" placeholder="Ask Copilot anything about your event plan..." style="flex: 1; margin: 0;" autocomplete="off" required>
+                <button type="submit" class="btn btn-primary" id="btn-send-chat" style="padding: var(--space-3) var(--space-5);">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </form>
+            </div>
+          </div>
+        </main>
+      </div>
+    `;
+
+    initSidebar();
+
+    // Custom CSS for chips
+    const styleEl = document.createElement('style');
+    styleEl.innerHTML = `
+      .chip-btn {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid var(--color-border-subtle);
+        border-radius: var(--radius-full);
+        color: var(--color-text-secondary);
+        font-size: var(--text-xs);
+        padding: 6px 12px;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+      .chip-btn:hover {
+        background: rgba(124,58,237,0.15);
+        border-color: rgba(124,58,237,0.4);
+        color: #A78BFA;
+      }
+      .chat-msg {
+        display: flex;
+        gap: var(--space-3);
+        max-width: 80%;
+      }
+      .chat-msg.user {
+        align-self: flex-end;
+        flex-direction: row-reverse;
+      }
+      .chat-msg.assistant {
+        align-self: flex-start;
+      }
+      .chat-bubble {
+        padding: var(--space-3) var(--space-4);
+        border-radius: var(--radius-xl);
+        font-size: var(--text-sm);
+        line-height: 1.5;
+      }
+      .chat-msg.user .chat-bubble {
+        background: var(--gradient-brand);
+        color: #FFFFFF;
+        border-bottom-right-radius: var(--radius-sm);
+      }
+      .chat-msg.assistant .chat-bubble {
+        background: var(--color-bg-surface);
+        border: 1px solid var(--color-border-subtle);
+        color: var(--color-text-primary);
+        border-bottom-left-radius: var(--radius-sm);
+      }
+    `;
+    document.head.appendChild(styleEl);
+
+    async function loadEvents() {
+      const res = await getEvents();
+      const selector = document.getElementById('event-selector');
+      if (!res.ok || !res.data || !res.data.events || res.data.events.length === 0) {
+        document.getElementById('no-event-view').classList.remove('hidden');
+        document.getElementById('copilot-view').classList.add('hidden');
+        selector.innerHTML = '<option value="">No events found</option>';
+        return;
+      }
+
+      const events = res.data.events;
+      selector.innerHTML = events.map(ev => `
+        <option value="${ev.id}" ${ev.id === selectedEventId ? 'selected' : ''}>
+          ${escapeHtml(ev.name)}
+        </option>
+      `).join('');
+
+      if (!selectedEventId || !events.some(e => e.id === selectedEventId)) {
+        selectedEventId = events[0].id;
+      }
+      localStorage.setItem('planora_active_event_id', selectedEventId);
+
+      document.getElementById('tab-studio').href = `planner.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-budget').href = `budget.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-timeline').href = `timeline.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-tasks').href = `tasks.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-vendors').href = `vendors.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-guests').href = `guests.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-copilot').href = `copilot.html?event_id=${selectedEventId}`;
+      document.getElementById('tab-reports').href = `reports.html?event_id=${selectedEventId}`;
+
+      await refreshCopilot();
+    }
+
+    async function refreshCopilot() {
+      const evRes = await getEvent(selectedEventId);
+      if (!evRes.ok) return;
+      currentEvent = evRes.data;
+
+      document.getElementById('no-event-view').classList.add('hidden');
+      document.getElementById('copilot-view').classList.remove('hidden');
+      document.getElementById('page-event-name').textContent = `${currentEvent.name} – Copilot`;
+
+      // Welcome message
+      messageHistory = [];
+      const stream = document.getElementById('chat-stream');
+      stream.innerHTML = '';
+      appendMessage('assistant', `Hello! I'm your Planora Copilot for **${escapeHtml(currentEvent.name)}**. I have your target budget of ${currentEvent.currency} ${Number(currentEvent.budget).toLocaleString()}, guest count of ${currentEvent.guest_count}, and target date grounded in memory. How can I help you refine your event arrangements today?`);
+    }
+
+    function appendMessage(role, text) {
+      const stream = document.getElementById('chat-stream');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `chat-msg ${role}`;
+
+      const avatar = document.createElement('div');
+      avatar.style.width = '32px';
+      avatar.style.height = '32px';
+      avatar.style.borderRadius = '50%';
+      avatar.style.display = 'flex';
+      avatar.style.alignItems = 'center';
+      avatar.style.justifyContent = 'center';
+      avatar.style.fontSize = '14px';
+      avatar.style.flexShrink = '0';
+      avatar.style.background = (role === 'user') ? 'rgba(255,255,255,0.1)' : 'rgba(124,58,237,0.2)';
+      avatar.textContent = (role === 'user') ? '👤' : '🤖';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'chat-bubble';
+      bubble.innerHTML = escapeHtml(text).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+
+      msgDiv.appendChild(avatar);
+      msgDiv.appendChild(bubble);
+      stream.appendChild(msgDiv);
+      stream.scrollTop = stream.scrollHeight;
+
+      messageHistory.push({ role, content: text });
+    }
+
+    async function handleSendMessage(queryText) {
+      if (!queryText || !selectedEventId) return;
+
+      appendMessage('user', queryText);
+      document.getElementById('chat-input').value = '';
+
+      const btn = document.getElementById('btn-send-chat');
+      btn.disabled = true;
+
+      // Show typing indicator
+      const stream = document.getElementById('chat-stream');
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'chat-msg assistant';
+      typingDiv.id = 'typing-indicator';
+      typingDiv.innerHTML = `
+        <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(124,58,237,0.2); font-size: 14px;">🤖</div>
+        <div class="chat-bubble" style="color: var(--color-text-tertiary); font-style: italic;">Planora Copilot is thinking...</div>
+      `;
+      stream.appendChild(typingDiv);
+      stream.scrollTop = stream.scrollHeight;
+
+      const res = await chatWithCopilot(selectedEventId, queryText, messageHistory.slice(-6));
+      typingDiv.remove();
+      btn.disabled = false;
+
+      if (!res.ok) {
+        showToast(res.error || 'Copilot failed to respond', 'error');
+        appendMessage('assistant', 'I encountered an error trying to process your request. Please try asking again.');
+        return;
+      }
+
+      const reply = res.data.message || 'I have analyzed your request.';
+      appendMessage('assistant', reply);
+
+      // Render new suggested quick chips if returned
+      if (res.data.suggestions && res.data.suggestions.length > 0) {
+        const chipsContainer = document.getElementById('quick-chips-container');
+        chipsContainer.innerHTML = res.data.suggestions.map(s => `
+          <button class="chip-btn" data-query="${escapeHtml(s)}">${escapeHtml(s)}</button>
+        `).join('');
+        wireChipListeners();
+      }
+    }
+
+    document.getElementById('chat-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      handleSendMessage(input.value.trim());
+    });
+
+    function wireChipListeners() {
+      document.querySelectorAll('.chip-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const q = btn.getAttribute('data-query');
+          handleSendMessage(q);
+        });
+      });
+    }
+
+    wireChipListeners();
+
+    document.getElementById('event-selector').addEventListener('change', (e) => {
+      selectedEventId = e.target.value;
+      localStorage.setItem('planora_active_event_id', selectedEventId);
+      refreshCopilot();
+    });
+
+    loadEvents();
+  </script>
+</body>
+</html>
